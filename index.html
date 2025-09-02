@@ -1,16 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiger Zhang's CS180 Portfolio</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            background-image: url('assets/images/background.jpg'); /* Placeholder for background image */
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #6c757d;
+        }
+        .projects {
+            
+        }
+        .project {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .project:hover {
+            transform: translateY(-5px);
+        }
+        .project a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .project p {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <a href="./project0/index.html">Project 0</a>
+    <div class="container">
+        <header>
+            <h1>Tiger Zhang's CS180 Portfolio</h1>
+            <p>A collection of my pretty images and videos.</p>
+        </header>
+
+        <main>
+            <section class="projects">
+                <div class="project">
+                    <h3><a href="./project0/index.html">Project 0</a></h3>
+                    <p>Becoming Friends with Your Camera</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
+        </footer>
+    </div>
 </body>
-</html>
