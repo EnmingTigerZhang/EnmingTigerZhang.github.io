@@ -5,17 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiger Zhang's CS180 Portfolio</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
-            background: #f8f9fa;
+            overflow: hidden; /* Lock the main viewport */
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             color: #333;
-            padding: 20px;
-            background-image: url('assets/images/background.jpg'); /* Placeholder for background image */
+        }
+        .background {
+            position: fixed;
+            inset: -10px; /* Covers the screen + a bleed area */
+            z-index: -1;
+            background-image: url('assets/images/background.jpg');
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
+        }
+        .scroll-container {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* For mobile bounce */
+            padding: 20px;
+            box-sizing: border-box;
         }
         header {
             text-align: center;
@@ -62,8 +76,10 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
+    <div class="background"></div>
+    <div class="scroll-container">
+        <div class="container">
+            <header>
             <h1>Tiger Zhang's CS180 Portfolio</h1>
             <p>A collection of my pretty images and videos.</p>
         </header>
@@ -79,6 +95,7 @@
 
         <footer>
             <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
-        </footer>
+                </footer>
+        </div>
     </div>
 </body>
