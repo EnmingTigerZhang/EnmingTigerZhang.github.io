@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1 - CS180 Portfolio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            color: #333;
+            margin: 0;
+            background-image: url('../assets/images/background.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1000px; /* Increased width for larger images */
+            margin: 40px auto 80px; /* Added more bottom margin */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #6c757d;
+        }
+        .project-section {
+            margin-bottom: 40px;
+        }
+        .project-section h2 {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .formula {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            white-space: pre;
+        }
+        .results-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .result-item img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-item figcaption {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center; /* Center the caption text */
+        }
+        .image-item img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .image-item figcaption {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">Back to Portfolio</a>
+        <header>
+            <h1>Project 1: Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo collection</h1>
+        </header>
+
+        <main>
+            <section class="project-section">
+                <h2>Overview</h2>
+                <p>
+                    In this project, I built two pipelines (one naive on small images, one robust on larger images) that take in a glass plate image (with the blue, green, and red colors stacked vertically in equal size in that order), and output a single colored image.
+                    To achieve this, I explored various different criteria for evaluating image alignment, including the l2-difference between images and the normalized cross-correlation (NCC) score.
+                    I also implemented both a naive complete grid search (part 1, for smaller images), and a pyramid search algorithm (part 2, for larger images) that can more efficiently process larger images. More details in future sections.
+                </p>
+            </section>
+
+            <section class="project-section">
+                <h2>Metrics Used for Alignment</h2>
+                <h3>Sum of Squared Differences (L2 Distance)</h3>
+                <p>
+                    L2 distance is used to directly measure the degree of difference between the color channels. We calculate the difference between the intensity of each corresponding pixel, square that difference, and sum over the per-pixel results. While simple and fast, it is sensitive to brightness and contrast variations between the channels. As a sidenote, in the code, I multiplied the score by -1 so that a higher score represents a better match, just like NCC.
+                </p>
+                <div class="formula">SSD = || I₁ - I₂ ||²</div>
+
+                <h3>Normalized Cross-Correlation (NCC)</h3>
+                <p>
+                    Normalized Cross-Correlation (NCC) is used as a more robust metric for measuring the similarity between channels; this was useful especially when different channels have different brightness and contrast levels. It includes demeaning both channels, calculating the dot product between the demeaned channels, and dividing by the product of the norms of the demeaned channels. This normalization makes it invariant to linear changes in brightness and contrast. The resulting score ranges from -1 (perfect anti-correlation) to +1 (perfect correlation), with values closer to +1 indicating a better match.
+                </p>
+                <div class="formula">NCC = (demeaned I₁ ⋅ demeaned I₂) / (||demeaned I₁||*||demeaned I₂||)</div>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 1: Single-Scale Alignment</h2>
+                <p>
+                    For smaller images, it was possible to do complete grid searches for the optimal shifts for the channels because of two main reasons.
+                    Firstly, it doesn't take that long to calculate L2-distance/NCC scores for each alignment.
+                    Secondly, there are also less possible choices for shifts, and therefore the "grid" to search over is smaller.
+                    This means the total runtime for running naive complete grid search for small images was reasonable.
+                    <br><br>
+                    Specifically, I aligned the green and red channels to the blue channel.
+                    The format of the numerical shift is <b>{color}: ({x_shift}, {y_shift})</b>, where <b>x_shift</b> is the horizontal shift of the channel from blue (positive means it's shifted to the right), and <b>y_shift</b> is the vertical shift of the channel from blue (positive means it's shifted down).
+                    <br><br>
+                    During development, I initially wasn't able to align images well; my main solution was cropping more from the image.
+                    It was very likely that the black borders (some seeming to have text and other noise) were detrimental to the matching of the channels.
+                    <br><br>
+                    For the following images, I used NCC as the metric.
+                </p>
+                <h3>Results</h3>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/naive/cathedral.jpg" alt="Cathedral">
+                        <figcaption>Cathedral<br>G: (2, 5)<br>R: (3, 12)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/naive/monastery.jpg" alt="Monastery">
+                        <figcaption>Monastery<br>G: (2, -3)<br>R: (2, 3)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/naive/tobolsk.jpg" alt="Tobolsk">
+                        <figcaption>Tobolsk<br>G: (3, 3)<br>R: (3, 6)</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 2: Multi-Scale Alignment (Image Pyramid)</h2>
+                <p>
+                    [Your explanation of the multi-scale alignment process will go here.]
+                </p>
+                <h3>Results (Given Images)</h3>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/cathedral.jpg" alt="Cathedral">
+                        <figcaption>Cathedral<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/church.jpg" alt="Church">
+                        <figcaption>Church<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/emir.jpg" alt="Emir">
+                        <figcaption>Emir<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/harvesters.jpg" alt="Harvesters">
+                        <figcaption>Harvesters<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/icon.jpg" alt="Icon">
+                        <figcaption>Icon<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/italil.jpg" alt="Italil">
+                        <figcaption>Italil<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/lastochikino.jpg" alt="Lastochikino">
+                        <figcaption>Lastochikino<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/lugano.jpg" alt="Lugano">
+                        <figcaption>Lugano<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/melons.jpg" alt="Melons">
+                        <figcaption>Melons<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/monastery.jpg" alt="Monastery">
+                        <figcaption>Monastery<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/self_portrait.jpg" alt="Self Portrait">
+                        <figcaption>Self Portrait<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/siren.jpg" alt="Siren">
+                        <figcaption>Siren<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/three_generations.jpg" alt="Three Generations">
+                        <figcaption>Three Generations<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_given/tobolsk.jpg" alt="Tobolsk">
+                        <figcaption>Tobolsk<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                </div>
+                <h3 style="margin-top: 40px;">Results (Self-Chosen Images)</h3>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_self_chosen/cross.jpg" alt="Cross">
+                        <figcaption>Cross<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_self_chosen/flower.jpg" alt="Flower">
+                        <figcaption>Flower<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/pyramid_self_chosen/house.jpg" alt="House">
+                        <figcaption>House<br>G: (x, y)<br>R: (x, y)</figcaption>
+                    </figure>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
+        </footer>
+    </div>
+</body>
+</html>
