@@ -130,14 +130,16 @@
                     Firstly, it doesn't take that long to calculate L2-distance/NCC scores for each alignment.
                     Secondly, there are also less possible choices for shifts, and therefore the "grid" to search over is smaller.
                     This means the total runtime for running naive complete grid search for small images was reasonable.
+                    In the end, I searched over all possible combinations of x shifts and y shifts, both ranged from -15 to 15, inclusive.
                     <br><br>
                     Specifically, I aligned the green and red channels to the blue channel.
                     The format of the numerical shift is <b>{color}: ({x_shift}, {y_shift})</b>, where <b>x_shift</b> is the horizontal shift of the channel from blue (positive means it's shifted to the right), and <b>y_shift</b> is the vertical shift of the channel from blue (positive means it's shifted down).
                     <br><br>
                     During development, I initially wasn't able to align images well; my main solution was cropping more from the image.
                     It was very likely that the black borders (some seeming to have text and other noise) were detrimental to the matching of the channels.
+                    In the end, I cropped 10% from each side of the image (e.g. the resulting image will be 80% the original width and 80% of the original height).
                     <br><br>
-                    For the following images, I used NCC as the metric.
+                    For the following images, I used NCC as the metric. Explanations are at the top of the webpage.
                 </p>
                 <h3>Results</h3>
                 <div class="results-gallery">
@@ -159,80 +161,95 @@
             <section class="project-section">
                 <h2>Part 2: Multi-Scale Alignment (Image Pyramid)</h2>
                 <p>
-                    [Your explanation of the multi-scale alignment process will go here.]
+                    For larger images, it's more difficult to do a complete grid search unlike the smaller images, for two main reasons.
+                    Firstly, because the images are larger, the metrics (L2-distance and NCC) take longer to execute.
+                    Secondly, because the images are larger, there is more possible shifts to search over, taking more time overall.
+                    Thus, instead, I performed a pyramid search where I started from the coarsest level (smallest image, constructed by repeatedly dividing the image width/height by 2), finds the best x and y shifts in that level, and then multiplies the shifts by 2 as well as expanding the image size by 2, and searches in a defined grid around that x and y shift, until we are back at the original image.
+                    <br><br>
+                    To me, it seems like having a lot of layers is mostly to be able to achieve a relatively high x or y shift while not having to search over too many shifts. Because having a search radius of 12 (which is relatively large) was still relatively efficient, I chose to use the slightly shorter depth of 4 layers.
+                    Following Professor Efro's advice on Ed, I decided to crop off 20% on each side of the image (e.g. the resulting image will have 60% of the original width and 60% of the original height).
+                    <br><br>
+                    For pyramid search, I actually aligned the blue and red channels to the green channel (instead of aligning greena nd red to blue).
+                    This mostly followed from repeated failure on the image of Emir. While trying for fixes (such as hyperparameters that are explained below), it seemed to me that choosing blue as the "reference" channel is quite arbitrary.
+                    It made sense that due to the physical properties of the different glass plates used to capture the images, it might be easier to align certain images to others.
+                    Further, while looking at the glass plate image for Emir, it seems like the green channel was like an "in between" of the blue and the red channels, so it made sense that it's easier to match to the green channel.
+                    This worked well on all given images.
+                    For the numerical shifts, the format is <b>{color}: ({x_shift}, {y_shift})</b>, where <b>x_shift</b> is the horizontal shift of the channel from green (positive means it's shifted to the right), and <b>y_shift</b> is the vertical shift of the channel from green (positive means it's shifted down).
+                    <br><br>
+                    For the following images, I used NCC as the metric. Explanations are at the top of the webpage.
                 </p>
                 <h3>Results (Given Images)</h3>
                 <div class="results-gallery">
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/cathedral.jpg" alt="Cathedral">
-                        <figcaption>Cathedral<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Cathedral<br>B: (-2, -5)<br>R: (1, 7)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/church.jpg" alt="Church">
-                        <figcaption>Church<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Church<br>B: (-4, -25)<br>R: (-8, 33)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/emir.jpg" alt="Emir">
-                        <figcaption>Emir<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Emir<br>B: (-24, -49)<br>R: (17, 57)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/harvesters.jpg" alt="Harvesters">
-                        <figcaption>Harvesters<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Harvesters<br>B: (-17, -59)<br>R: (-3, 65)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/icon.jpg" alt="Icon">
-                        <figcaption>Icon<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Icon<br>B: (-17, -40)<br>R: (5, 48)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/italil.jpg" alt="Italil">
-                        <figcaption>Italil<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Italil<br>B: (-21, -38)<br>R: (15, 39)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/lastochikino.jpg" alt="Lastochikino">
-                        <figcaption>Lastochikino<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Lastochikino<br>B: (2, 2)<br>R: (-7, 78)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/lugano.jpg" alt="Lugano">
-                        <figcaption>Lugano<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Lugano<br>B: (16, -41)<br>R: (-13, 52)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/melons.jpg" alt="Melons">
-                        <figcaption>Melons<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Melons<br>B: (-10, -81)<br>R: (3, 96)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/monastery.jpg" alt="Monastery">
-                        <figcaption>Monastery<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Monastery<br>B: (-2, 3)<br>R: (1, 6)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/self_portrait.jpg" alt="Self Portrait">
-                        <figcaption>Self Portrait<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Self Portrait<br>B: (-29, -78)<br>R: (8, 98)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/siren.jpg" alt="Siren">
-                        <figcaption>Siren<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Siren<br>B: (5, -49)<br>R: (-19, 47)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/three_generations.jpg" alt="Three Generations">
-                        <figcaption>Three Generations<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Three Generations<br>B: (-14, -50)<br>R: (-3, 59)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_given/tobolsk.jpg" alt="Tobolsk">
-                        <figcaption>Tobolsk<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Tobolsk<br>B: (-3, -3)<br>R: (1, 4)</figcaption>
                     </figure>
                 </div>
                 <h3 style="margin-top: 40px;">Results (Self-Chosen Images)</h3>
                 <div class="results-gallery">
                     <figure class="result-item">
                         <img src="./assets/pyramid_self_chosen/cross.jpg" alt="Cross">
-                        <figcaption>Cross<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Cross<br>B: (7, -67)<br>R: (-12, 75)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_self_chosen/flower.jpg" alt="Flower">
-                        <figcaption>Flower<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>Flower<br>B: (-19, -28)<br>R: (3, 49)</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/pyramid_self_chosen/house.jpg" alt="House">
-                        <figcaption>House<br>G: (x, y)<br>R: (x, y)</figcaption>
+                        <figcaption>House<br>B: (11, -35)<br>R: (-21, 57)</figcaption>
                     </figure>
                 </div>
             </section>
