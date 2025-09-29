@@ -77,6 +77,12 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .three-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -288,7 +294,9 @@
                     </figure>
                 </div>
 
-                <p>[Your explanation of the gradient magnitude calculation goes here.]</p>
+                <p>I then made a gradient magnitude image from my discrete partial derivative images.
+                    In particular, at each pixel, I took the square root of the sum of the squares of the same pixel's value in the two gradient magnitude images, and got the following result.
+                </p>
                 <div class="single-image-container">
                     <figure class="result-item">
                         <img src="./assets/1.2/raw_gradient_magnitude.jpg" alt="Gradient Magnitude">
@@ -296,7 +304,8 @@
                     </figure>
                 </div>
 
-                <p>[Your explanation of the binarization process and your choice of threshold goes here.]</p>
+                <p>Finally, I chose thresholds for each pixel; in particular, if the gradient magnitude at a pixel has value <b>greater than 0.33</b>, then the pixel gets a value of 1.
+                Otherwise, the pixel gets a value of 0. I chose the threshold by experimenting with different values, and evaluating how much noise v.s. details are in the images. If there were too much noise, I highered the threshold; otherwise, I lowered the threshold.</p>
                 <div class="single-image-container">
                     <figure class="result-item">
                         <img src="./assets/1.2/binarized.jpg" alt="Binarized Edge Image">
@@ -305,7 +314,92 @@
                 </div>
 
                 <h3>1.3: Gaussian and Difference of Gaussians (DoG)</h3>
-                <p>[Explain the construction of your Gaussian and DoG filters. Show the filter visualizations, the smoothed image, and the DoG filtered image. Compare these results with the finite difference method.]</p>
+                <p>In this section, I explored applying a Gaussian filter first before getting the edges from the cameraman image.
+                    In particular, I explored both applying a Gaussian filter first, and then applying the discrete partial derivative kernels; and also applying derivative of Gaussian (DoG) kernels directly, which are the results from convolving the Gaussian filter with the discrete partial derivative kernels.
+                    Visualizations shown below.
+                </p>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/gaussian_kernel.jpg" alt="Gaussian Kernel Visualization">
+                        <figcaption>Gaussian Kernel</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/DOG_x.jpg" alt="DoG_x Visualization">
+                        <figcaption>DoG Filter (X)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/DOG_y.jpg" alt="DoG_y Visualization">
+                        <figcaption>DoG Filter (Y)</figcaption>
+                    </figure>
+                </div>
+
+                <p>The images below contrast the original cameraman image (right) v.s. the blurred cameraman image after applying a Gaussian filter.</p>
+
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/blurred.jpg" alt="Blurred Cameraman">
+                        <figcaption>Blurred Cameraman</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/cameraman.png" alt="Original Cameraman">
+                        <figcaption>Original Cameraman</figcaption>
+                    </figure>
+                </div>
+
+                <p>I then applied a workflow similar to part 1.2 to get the binarized edge images.
+                    In the left column, I applied a strategy identical to what I did in part 1.2 (discrete partial derivatives in both directions, then gradient magnitude image, then binarize by choosing a threshold) on the Gaussian blurred image.
+                    In the right column, I applied the DoG filters in both directions instead of the discrete partial derivatives; otherwise, I employed the same strategy as part 1.2.
+                    <br>
+                    Note that the results in the two columns are <b>identical</b>. This is due to the associativity property of convolutions.
+                </p>
+
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/dx_res.jpg" alt="Gaussian then Derivative Dx">
+                        <figcaption>Gaussian then Derivative (Dx)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/dx_res_2.jpg" alt="DoG Dx">
+                        <figcaption>DoG Filter (Dx)</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/dy_res.jpg" alt="Gaussian then Derivative Dy">
+                        <figcaption>Gaussian then Derivative (Dy)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/dy_res_2.jpg" alt="DoG Dy">
+                        <figcaption>DoG Filter (Dy)</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/raw_gradient_magnitude.jpg" alt="Gradient Magnitude from Gaussian">
+                        <figcaption>Gradient Magnitude from Gaussian then Derivative</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/raw_gradient_magnitude_2.jpg" alt="Gradient Magnitude from DoG">
+                        <figcaption>Gradient Magnitude from DoG</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.3/binarized.jpg" alt="Binarized from Gaussian">
+                        <figcaption>Binarized from Gaussian then Derivative</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.3/binarized_2.jpg" alt="Binarized from DoG">
+                        <figcaption>Binarized from DoG</figcaption>
+                    </figure>
+                </div>
+                <p>Although the results of those two strategies (Gaussian then Derivative, Derivative of Gaussian) were identical, the result from 1.3 was not the same as the result from 1.2.
+                    In particular, Gaussian filtering reduced some of the noise in the image, leaving the "big changes" in the image to be mostly the important edges.
+                    It also did make the gradient magnitudes smaller; applying the same strategy as 1.2, I experimented with various values for the cutoff for binarization, decreasing it when there's too little details and increasing it when there's too much noise.
+                    <br>
+                    In the end, I finalized on a value of <b>0.1477</b> for my cutoff. This seems to have retained more detail than the previous results from part 1.2, while not being polluted by too much noise.
+                    The numerical value of the cutoff itself, though, is considerably lower than what I chose for part 1.2, because of the decrease in gradient magnitudes.
+                </p>
             </section>
 
             <section class="project-section">
