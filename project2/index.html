@@ -83,6 +83,12 @@
             gap: 20px;
             align-items: start;
         }
+        .four-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -106,7 +112,7 @@
 
         <main>
             <section class="project-section">
-                <h2>Part 1: Filters and Edges</h2>
+                <h2>Part 1: Fun with Filters</h2>
                 <h3>1.1: Convolution</h3>
                 <p>In this section, I implemented convolutions from scratch using numpy operations.
                     I had a naive four for loops implementation, and two two for loops implementations that are more efficient.
@@ -313,10 +319,10 @@
                     </figure>
                 </div>
 
-                <h3>1.3: Gaussian and Difference of Gaussians (DoG)</h3>
+                <h3>1.3: Gaussian and Derivative of Gaussians (DoG)</h3>
                 <p>In this section, I explored applying a Gaussian filter first before getting the edges from the cameraman image.
                     In particular, I explored both applying a Gaussian filter first, and then applying the discrete partial derivative kernels; and also applying derivative of Gaussian (DoG) kernels directly, which are the results from convolving the Gaussian filter with the discrete partial derivative kernels.
-                    Visualizations shown below.
+                    Visualizations shown below. I used 9x9 Gaussian kernels.
                 </p>
                 <div class="three-col-gallery">
                     <figure class="result-item">
@@ -395,17 +401,104 @@
                 </div>
                 <p>Although the results of those two strategies (Gaussian then Derivative, Derivative of Gaussian) were identical, the result from 1.3 was not the same as the result from 1.2.
                     In particular, Gaussian filtering reduced some of the noise in the image, leaving the "big changes" in the image to be mostly the important edges.
-                    It also did make the gradient magnitudes smaller; applying the same strategy as 1.2, I experimented with various values for the cutoff for binarization, decreasing it when there's too little details and increasing it when there's too much noise.
+                    It also did make the gradient magnitudes smaller.
+                    Applying the same strategy as 1.2, I experimented with various values for the cutoff for binarization, decreasing it when there's too little details and increasing it when there's too much noise.
                     <br>
                     In the end, I finalized on a value of <b>0.1477</b> for my cutoff. This seems to have retained more detail than the previous results from part 1.2, while not being polluted by too much noise.
-                    The numerical value of the cutoff itself, though, is considerably lower than what I chose for part 1.2, because of the decrease in gradient magnitudes.
+                    The numerical value of the cutoff itself, though, is considerably lower than what I chose for part 1.2, because of the aforementioned decrease in gradient magnitudes.
                 </p>
             </section>
 
             <section class="project-section">
-                <h2>Part 2: Applications</h2>
-                <h3>2.1: Unsharp Mask Filter</h3>
-                <p>[Explain how the unsharp mask filter works. Show the blurred, high-frequency, and sharpened versions of the Taj Mahal and another image. Demonstrate the effect of varying the sharpening amount.]</p>
+                <h2>Part 2: Fun with Frequencies</h2>
+                <h3>2.1: Image "Sharpening"</h3>
+                <p>In this section, I sharpened images by adding more of the high frequency components of those images to them.
+                    To find the high frequency components, I subtracted the low frequency components (from Gaussian filtering) from the images.
+                    Noting the distributivity of convolutions, I decided to collapse those operations into one convolution, with a kernel that is the impulse kernel minus the Gaussian kernel.
+                    This allowed me to find the high frequency components with just one convolution.
+                    After finding the high frequency components, I added α times the high frequencies to the original images. I clipped all values between 0.0 and 1.0. I applied this process on each channel separately.
+                    <br>
+                    For results below, unless otherwise stated, I used kernels of size 9x9.
+                </p>
+
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.1/to_sharpen/taj.jpg" alt="Original Taj">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/taj_1.jpg" alt="Taj Sharpened (Alpha=1)">
+                        <figcaption>Sharpened (α=1)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/taj_2.jpg" alt="Taj Sharpened (Alpha=2)">
+                        <figcaption>Sharpened (α=2)</figcaption>
+                    </figure>
+                </div>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/taj_3.jpg" alt="Taj Sharpened (Alpha=3)">
+                        <figcaption>Sharpened (α=3)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/taj_5.jpg" alt="Taj Sharpened (Alpha=5)">
+                        <figcaption>Sharpened (α=5)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/taj_high_freq.jpg" alt="Taj High Frequencies">
+                        <figcaption>High Frequencies</figcaption>
+                    </figure>
+                </div>
+                <p>Increasing the value of α (e.g. the degree to which high frequencies are added) increases the amount of visible high frequencies in the resulting image.
+                    For example, lines in the image are more pronounced (especially in the section to our left of the center).
+                    This makes the image look less blurry overall.
+                    <br>
+                    Overall, α=2 was my favorite. At α's that were too high, the images had so much high frequency lines that they looked "cartoonish". At α's that were too low, the images were too blurry.
+                </p>
+
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.1/to_sharpen/books.jpg" alt="Original Books">
+                        <figcaption>Original Books</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/books.jpg" alt="Sharpened Books">
+                        <figcaption>Sharpened Books</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/sharpened_res/books_high_freq.jpg" alt="Books High Frequencies">
+                        <figcaption>High Frequencies</figcaption>
+                    </figure>
+                </div>
+                <p>I then applied the aforementioned strategy to a blurry image of bookshelves that I've found online.
+                    For this, I chose an α value of 8. The books (especially the separation between them) is much sharper after sharpening the image.
+                </p>
+
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.1/evaluation/doe.jpg" alt="Original Doe">
+                        <figcaption>Original</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/evaluation/doe_blurred.jpg" alt="Blurred Doe">
+                        <figcaption>Blurred</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.1/evaluation/doe_resharpened.jpg" alt="Resharpened Doe">
+                        <figcaption>Resharpened</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.1/evaluation/doe_high_freq.jpg" alt="Doe High Frequencies">
+                        <figcaption>High Frequencies</figcaption>
+                    </figure>
+                </div>
+                <p>I then applied the strategy to a Gaussian blurred version of an image of doe library, and then re-sharpened it.
+                    I used Gaussian kernels of size 18x18, and an alpha value of 8.
+                    Re-sharpening had significant effects, recreating the floral patterns in the ceiling that were close to being invisible in the blurred version.
+                    This makes sense as the floral patterns are visible in the high frequency image.
+                </p>
 
                 <h3>2.2: Hybrid Images</h3>
                 <p>[Present your three hybrid images. For one, detail the entire process including original images, Fourier transforms, filtered results, and cutoff frequency choice. For the other two, show the originals and the final hybrid.]</p>
