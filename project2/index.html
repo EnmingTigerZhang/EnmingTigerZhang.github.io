@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 2 - CS180 Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovJHGJDRshipwe7UWlbpCMXoPPETgOFthe7U2f0M8gKCWHzMRoMuL/se2/UPOJIm+PA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            color: #333;
+            margin: 0;
+            background-image: url('../assets/images/background.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #6c757d;
+        }
+        .project-section {
+            margin-bottom: 40px;
+        }
+        .project-section h2 {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        /* Style for code blocks */
+        pre[class*="language-"] {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .results-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .result-item img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-item figcaption {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .single-image-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 50%; /* Match the width of one gallery item */
+        }
+        .single-image-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">Back to Portfolio</a>
+        <header>
+            <h1>Project 2: Fun with Filters and Frequencies</h1>
+            <p>A brief description of the project will go here.</p>
+        </header>
+
+        <main>
+            <section class="project-section">
+                <h2>Part 1: Filters and Edges</h2>
+                <h3>1.1: Convolution</h3>
+                <p>In this section, I implemented convolutions from scratch using numpy operations.
+                    I had a naive four for loops implementation, and two two for loops implementations that are more efficient.
+                    I also implemented various modes of padding (how I dealt with the four edges). All are explained below.
+                </p>
+                
+                <h4>Code</h4>
+                <p>I took a modular approach for convolutions, implementing the padding function below that pads images according to some specifications (like full or valid).
+                    After implementing my first two for loop implementation, I wasn't satisfied with the runtime, so I decided to try to optimize it further. All strategies implemented produced visually indistinguishable results.
+                    See below for details on runtime and strategies.
+                </p>
+                <pre><code class="language-python">def pad(signal, kernel, mode='full'):
+    kernel_height, kernel_width = kernel.shape
+    if mode == 'full':
+        return np.pad(signal, ((kernel_height - 1, kernel_height - 1), (kernel_width - 1, kernel_width - 1)))
+    elif mode == 'same':
+        if kernel_height % 2 == 0:
+            pad_height_before = kernel_height // 2
+            pad_height_after = kernel_height // 2 - 1
+        else:
+            pad_height_before, pad_height_after = kernel_height // 2, kernel_height // 2
+        if kernel_width % 2 == 0:
+            pad_width_before = kernel_width // 2
+            pad_width_after = kernel_width // 2 - 1
+        else:
+            pad_width_before, pad_width_after = kernel_width // 2, kernel_width // 2
+        return np.pad(signal, ((pad_height_before, pad_height_after), (pad_width_before, pad_width_after)))
+    elif mode == 'valid':
+        return signal
+    else:
+        print("Padding mode not supported")
+        return</code></pre>
+                <h5>4 For-Loops</h5>
+                <pre><code class="language-python">def convolve_naive(signal, kernel, mode='full'):
+    signal = pad(signal, kernel, mode)
+    kernel = kernel[::-1, ::-1]
+
+    kernel_height, kernel_width = kernel.shape
+    signal_height, signal_width = signal.shape
+
+    curr_res = None
+    for signal_row in range(signal_height - kernel_height + 1):
+        curr_row = []
+        for signal_col in range(signal_width - kernel_width + 1):
+            # Convolve
+            curr_convolve_res = 0
+            for kernel_row in range(kernel_height):
+                for kernel_col in range(kernel_width):
+                    signal_section = signal[signal_row + kernel_row][signal_col + kernel_col]
+                    curr_convolve_res += kernel[kernel_row][kernel_col] * signal_section
+            curr_row.append(curr_convolve_res)
+
+        if curr_res is None:
+            curr_res = np.array([curr_row])
+        else:
+            curr_res = np.vstack((curr_res, curr_row))
+    
+    return curr_res</code></pre>
+                <p>This is a standard naive implementation of convolution, with no usage of parallelism offered by numpy. It calls pad first.
+                    The outer two for loops iterate over "pixels" within the image/signal, and "anchors" the top left corner of the section of image to be multiplied with the kernel.
+                    The inner two for loops iterate over positions within the kernel, performing multiplications with the corresponding positions in the image/signal.
+                    <br>
+                    Applying the 9x9 box filter on a picture of me, this took around <b>200 seconds</b> (I have a relatively old computer).
+                </p>
+
+                <h5>2 For-Loops (Optimization 1)</h5>
+                <pre><code class="language-python">def convolve_optimized(signal, kernel, mode='full'):
+    signal = pad(signal, kernel, mode)
+    kernel = kernel[::-1, ::-1]
+
+    kernel_height, kernel_width = kernel.shape
+    signal_height, signal_width = signal.shape
+
+    curr_res = None
+    for signal_row in range(signal_height - kernel_height + 1):
+        curr_row = []
+        for signal_col in range(signal_width - kernel_width + 1):
+            # Convolve
+            convolve_res = np.sum(signal[signal_row:signal_row + kernel_height,
+                                    signal_col:signal_col + kernel_width] * kernel)
+            curr_row.append(convolve_res)
+
+        if curr_res is None:
+            curr_res = np.array([curr_row])
+        else:
+            curr_res = np.vstack((curr_res, curr_row))
+    
+    return curr_res</code></pre>
+                <p>Dissatisfied with the runtime of the 4 for loops implementation, I decided to use 2 for loops.
+                    Here, the outer two for loops iterate over positions in the image/signal, anchoring the top left corner for the current application of the kernel.
+                    This is like the 4 for loops implementation. However, instead of doing the multiplications with the kernel individually, I used numpy, which parallelizes elementwise multiplications, to replace my inner 2 for loops.
+                    <br>
+                    Applying the 9x9 box filter on a picture of me, this took around <b>25 seconds</b>.
+                </p>
+
+                <h5>2 For-Loops (Optimization 2)</h5>
+                <pre><code class="language-python">def convolve_optimized2(signal, kernel, mode='full'):
+    signal = pad(signal, kernel, mode)
+    kernel = kernel[::-1, ::-1]
+
+    kernel_height, kernel_width = kernel.shape
+    signal_height, signal_width = signal.shape
+
+    res_height, res_width = signal_height - kernel_height + 1, signal_width - kernel_width + 1
+
+    curr_res = np.zeros((res_height, res_width))
+    for kernel_row in range(kernel_height):
+        curr_row = []
+        for kernel_col in range(kernel_width):
+            # Convolve
+            signal_section = signal[kernel_row:kernel_row + res_height, kernel_col:kernel_col + res_width]
+            convolve_res = kernel[kernel_row][kernel_col] * signal_section
+            curr_res += convolve_res
+    
+    return curr_res</code></pre>
+                <p>I was still dissatisfied about the runtime of the 2 for loops optimization, so I decided to optimize more.
+                    I noticed that the result of convolutions is just essentially a sum of each number inside of the kernel multiplied by (close to) the entire image, summed together.
+                    Noting that my kernels were much smaller than my images, I wondered if it would be more efficient to iterate over the numbers inside the kernel instead.
+                    That is what I did in this implementation: I iterate over numbers inside the kernel, deduce what numbers inside the image they would be multiplied to, and then summed the results.
+                    <br>
+                    Applying the 9x9 box filter on a picture of me, this took around <b>1 second</b>. scipy.signal.convolve2d also took around <b>1 second</b>.
+                </p>
+
+                <h4>Results</h4>
+                <p>Below are the visual results of the convolution implementations compared with SciPy's library function. The original image is shown below.</p>
+                
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1.1/original_grayscale.jpg" alt="Original Image">
+                        <figcaption>Original Image</figcaption>
+                    </figure>
+                </div>
+
+                <h5>Box Filter</h5>
+                <p>Effect: noticeable blurring of the image, notably my shirt.</p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.1/box_np.jpg" alt="My Box Filter Result">
+                        <figcaption>My Implementation</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.1/box_scipy.jpg" alt="SciPy Box Filter Result">
+                        <figcaption>SciPy Result</figcaption>
+                    </figure>
+                </div>
+
+                <h5>Dx Filter</h5>
+                <p>Effect: horizontal edge detection</p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.1/dx_np.jpg" alt="My Dx Filter Result">
+                        <figcaption>My Implementation</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.1/dx_scipy.jpg" alt="SciPy Dx Filter Result">
+                        <figcaption>SciPy Result</figcaption>
+                    </figure>
+                </div>
+
+                <h5>Dy Filter</h5>
+                <p>Effect: vertical edge detection.</p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.1/dy_np.jpg" alt="My Dy Filter Result">
+                        <figcaption>My Implementation</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.1/dy_scipy.jpg" alt="SciPy Dy Filter Result">
+                        <figcaption>SciPy Result</figcaption>
+                    </figure>
+                </div>
+
+                <h3>1.2: Gradient and Edge Detection</h3>
+                <p>In this subpart, I read in a cameraman image, detected its edges, and binarized the resulting gradient magnitude image for an image of edges.
+                    I first applied the discrete partial derivative filters to the cameraman image, achieving the following results.</p>
+                
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1.2/dx_res.jpg" alt="Partial Derivative in X">
+                        <figcaption>Partial Derivative in X (Dx)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1.2/dy_res.jpg" alt="Partial Derivative in Y">
+                        <figcaption>Partial Derivative in Y (Dy)</figcaption>
+                    </figure>
+                </div>
+
+                <p>[Your explanation of the gradient magnitude calculation goes here.]</p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1.2/raw_gradient_magnitude.jpg" alt="Gradient Magnitude">
+                        <figcaption>Gradient Magnitude</figcaption>
+                    </figure>
+                </div>
+
+                <p>[Your explanation of the binarization process and your choice of threshold goes here.]</p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1.2/binarized.jpg" alt="Binarized Edge Image">
+                        <figcaption>Binarized Edge Image</figcaption>
+                    </figure>
+                </div>
+
+                <h3>1.3: Gaussian and Difference of Gaussians (DoG)</h3>
+                <p>[Explain the construction of your Gaussian and DoG filters. Show the filter visualizations, the smoothed image, and the DoG filtered image. Compare these results with the finite difference method.]</p>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 2: Applications</h2>
+                <h3>2.1: Unsharp Mask Filter</h3>
+                <p>[Explain how the unsharp mask filter works. Show the blurred, high-frequency, and sharpened versions of the Taj Mahal and another image. Demonstrate the effect of varying the sharpening amount.]</p>
+
+                <h3>2.2: Hybrid Images</h3>
+                <p>[Present your three hybrid images. For one, detail the entire process including original images, Fourier transforms, filtered results, and cutoff frequency choice. For the other two, show the originals and the final hybrid.]</p>
+
+                <h3>2.3 & 2.4: Gaussian/Laplacian Stacks and Blending</h3>
+                <p>[Visualize the Gaussian and Laplacian stacks for the Orange/Apple images and recreate the blending results. Include your two additional custom blended images, ensuring one uses an irregular mask.]</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi00O2iPAQ5GUJWYlig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>
