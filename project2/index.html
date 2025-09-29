@@ -93,6 +93,14 @@
             gap: 20px;
             align-items: start;
         }
+        .wide-three-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px; /* Decreased gap */
+            align-items: start;
+            margin-left: -20px; /* Counteract container padding */
+            margin-right: -20px;
+        }
         .four-col-gallery {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -117,7 +125,11 @@
         <a href="../index.html" class="back-link">Back to Portfolio</a>
         <header>
             <h1>Project 2: Fun with Filters and Frequencies</h1>
-            <p>A brief description of the project will go here.</p>
+            <p>In this project, I explored various ways to "play" with frequencies using filters.
+                I built convolution from scratch; explored properties of convolution and detected edges in images; sharpened images, made hybrid images, and blended images together.
+                <br>
+                Some of my takeaways include gaining intuition for effects of various operations (e.g. Gaussians with larger standard deviations blur more), and learning that outside of the technical details, aligning images well is also important for good blending.
+            </p>
         </header>
 
         <main>
@@ -594,8 +606,94 @@
                     The robot highpass filtered FFT plot is missing the "bright central region" of frequencies that was present for the FFT plot of the original robot image.
                 </p>
 
-                <h3>2.3 & 2.4: Gaussian/Laplacian Stacks and Blending</h3>
-                <p>[Visualize the Gaussian and Laplacian stacks for the Orange/Apple images and recreate the blending results. Include your two additional custom blended images, ensuring one uses an irregular mask.]</p>
+                <h3>2.3 & 2.4: Gaussian/Laplacian Stacks and Multiresolution Blending</h3>
+                <p>In this section, I implemented multiresolution blending, where I change how large the "window of blending" is between two images at different frequencies.
+                    I achieved this through Gaussian and Laplacian Stacks.
+                    <br>
+                    To build Gaussian stacks, I repeatedly applied a gaussian kernel to convolve with the previous image in the stack, starting with the original image in the beginning of the stack.
+                    Unlike a Gaussian pyramid, I did not subsample the images in the stack, making it easier for me to build a Laplacian stack from my Gaussian stack.
+                    <br>
+                    To build Laplacian stacks, I took the difference between consecutive images in the Gaussian stack (e.g. the ith image in the laplacian stack is the difference between the ith and i+1th images in the Gaussian stack).
+                    Imagining the Gaussian kernel as a lowpass filter, each image in the Laplacian stack effectively contain a "band" of frequencies.
+                    I also did remember to take into account the last level in the Gaussian stack (containing the lowest frequencies) when doing multiresolution blending.
+                    <br>
+                    From having two laplacian stacks for my two images, I created a Gaussian stack for my mask as well, having higher layers (e.g. lower frequencies) having more of a "gradient" of blending instead of being a binary 0/1 mask.
+                    The images and masks were all the same size, so at each level, I elementwise-multiplied one image with the mask and the other with 1 - mask (elementwise subtraction), and summed over the results (sum per level, then sum over levels).
+                    I applied this operation on different channels separately, then combined the channels.
+                </p>
+
+                <h4>Oraple</h4>
+                <p>I first applied the aforementioned workflow to the classic example of blending apples with oranges.
+                    The mask started with a binary mask with ones on the left and zeros on the right.
+                    I had a 5-level stack, with the last level being all the lowest frequencies (I wanted to visualize it as well).
+                    I chose a Gaussian kernel with standard deviation of 5.0 for the images and 15.0 for the mask.
+                    I thought it made sense that differing standard deviations could work and wanted to see the results, and liked the results for this configuration.
+                </p>
+                <div class="full-width-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/visualizations/oraple.png" alt="Oraple Blend">
+                        <figcaption>The Oraple</figcaption>
+                    </figure>
+                </div>
+
+                <h4>Elixir</h4>
+                <p>I then applied this strategy to blend an image of a pink salt lake taken during the day and a night sky, to make it appear that the salt lake maintains its bright colors during the night.
+                    I started the mask at all ones just slightly below the horizon in the salt lake image.
+                    I chose the Gaussian kernel standard deviations to be 7.0 for both the images stack and the mask stack. This number came from experimentation and visually judging results.
+                    I also chose to have 7 levels for the stacks. This number also came from experimentation.
+                </p>
+                <div class="wide-three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/inputs/1_1.jpg" alt="Elixir Image 1">
+                        <figcaption>Daytime Salt Lake</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/outputs/1_res.jpg" alt="Elixir Result">
+                        <figcaption>A Lake of Glowing Elixir</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/inputs/1_2.jpg" alt="Elixir Image 2">
+                        <figcaption>Night Sky</figcaption>
+                    </figure>
+                </div>
+
+                <h4>Magic</h4>
+                <p>I also tried an example where the mask didn't initialize as a straight horizontal or vertical line.
+                    Here, I blended a person with their hands out and an image of fire to make it look as if the person is making fireballs. See my masks in the section below.
+                    I chose the Gaussian kernel standard deviation to be 5.0 for both the images stack and the mask stack.
+                    This came from experimentation and visually judging the results.
+                    I chose to have 7 levels again for the stack; this number is also from experimentation.
+                </p>
+                <div class="wide-three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/inputs/2_1.jpg" alt="Magic Image 1">
+                        <figcaption>Fire</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/outputs/2_res.jpg" alt="Magic Result">
+                        <figcaption>Harry Potter</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/inputs/2_2.jpg" alt="Magic Image 2">
+                        <figcaption>Muggle</figcaption>
+                    </figure>
+                </div>
+                <p>The following shows the evolution of the masked fire/person images in the stack, as well as the evolution of the mask itself.
+                    The lower levels show mostly the details (high frequency) of the images, with the mask being very "clear" at those levels.
+                    Higher levels moreso show the general colors of the images, with the mask becoming less "clear" and allowing more "blending over".
+                </p>
+                <div class="full-width-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/visualizations/custom_stacks.png" alt="Custom Stacks">
+                        <figcaption>Custom Stacks Visualization</figcaption>
+                    </figure>
+                </div>
+                <div class="full-width-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2.3&4/visualizations/custom_result.png" alt="Custom Result">
+                        <figcaption>Custom Blend Result</figcaption>
+                    </figure>
+                </div>
             </section>
         </main>
 
