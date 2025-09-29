@@ -77,6 +77,16 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .full-width-image-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 90%;
+        }
+        .full-width-image-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
         .three-col-gallery {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -113,7 +123,7 @@
         <main>
             <section class="project-section">
                 <h2>Part 1: Fun with Filters</h2>
-                <h3>1.1: Convolution</h3>
+                <h3>1.1: Convolution From Scratch!</h3>
                 <p>In this section, I implemented convolutions from scratch using numpy operations.
                     I had a naive four for loops implementation, and two two for loops implementations that are more efficient.
                     I also implemented various modes of padding (how I dealt with the four edges). All are explained below.
@@ -285,7 +295,7 @@
                     </figure>
                 </div>
 
-                <h3>1.2: Gradient and Edge Detection</h3>
+                <h3>1.2: Finite Difference Operator</h3>
                 <p>In this subpart, I read in a cameraman image, detected its edges, and binarized the resulting gradient magnitude image for an image of edges.
                     I first applied the discrete partial derivative filters to the cameraman image, achieving the following results.</p>
                 
@@ -319,7 +329,7 @@
                     </figure>
                 </div>
 
-                <h3>1.3: Gaussian and Derivative of Gaussians (DoG)</h3>
+                <h3>1.3: Derivative of Gaussian (DoG) Filter</h3>
                 <p>In this section, I explored applying a Gaussian filter first before getting the edges from the cameraman image.
                     In particular, I explored both applying a Gaussian filter first, and then applying the discrete partial derivative kernels; and also applying derivative of Gaussian (DoG) kernels directly, which are the results from convolving the Gaussian filter with the discrete partial derivative kernels.
                     Visualizations shown below. I used 9x9 Gaussian kernels.
@@ -501,7 +511,88 @@
                 </p>
 
                 <h3>2.2: Hybrid Images</h3>
-                <p>[Present your three hybrid images. For one, detail the entire process including original images, Fourier transforms, filtered results, and cutoff frequency choice. For the other two, show the originals and the final hybrid.]</p>
+                <p>In this section, I merged pairs of two images together such that they look like one image from far away and the other image close up.
+                    I did this by keeping the lower frequencies of one image (easier to see far away) and the higher frequencies of another image (dominates the visual field close up).
+                    The relevant lowpass filtering and highpass filtering behaviors are from convolving with Gaussians.
+                    In order to make the result visually convincing, I also aligned the images first, using the starter code given.
+                    See example results below.
+                </p>
+
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/1_low.jpg" alt="Derek">
+                        <figcaption>Derek</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/merged_results/1_res.jpg" alt="Pair 1 Merged">
+                        <figcaption>Hybrid Image</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/1_high.jpg" alt="Nutmeg">
+                        <figcaption>Nutmeg</figcaption>
+                    </figure>
+                </div>
+                <p>First, I blended together Derek and Nutmeg the cat. I used a gaussian kernel with standard deviation of 12 for Derek, and the gaussian kernel assisting gaining high frequencies for Nutmeg had a standard deviation of 9.
+                    Those values are chosen with experimentation (e.g. if I wanted more blurring for Derek, I can increase the lowpass gaussian kernel's standard deviation).
+                    <br>
+                    I did alignment at the eyes.
+                </p>
+
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/3_low.jpg" alt="Pair 3 Low Frequency">
+                        <figcaption>Race Car</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/merged_results/3_res.jpg" alt="Pair 3 Merged">
+                        <figcaption>Hybrid Image</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/3_high.jpg" alt="Pair 3 High Frequency">
+                        <figcaption>Old Car</figcaption>
+                    </figure>
+                </div>
+                <p>For this pair of images (race car and old car), I used a similar strategy as I did with Derek and Nutmeg.
+                    For this pair, I found that the gaussian for lowpass filtering produced good results with a standard deviation of ~4.2, and the gaussian for highpass filtering produced good results with a standard deviation of ~1.7.
+                    This can be due to the relatively smaller dimensions of the two images.
+                </p>
+
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/2_low.jpg" alt="Pair 2 Low Frequency">
+                        <figcaption>Human</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/merged_results/2_res.jpg" alt="Pair 2 Merged">
+                        <figcaption>Future?</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.2/raw_pairs/2_high.jpg" alt="Pair 2 High Frequency">
+                        <figcaption>Robot</figcaption>
+                    </figure>
+                </div>
+                <p>For this pair of images (human and robot), I also employed a similar strategy as the other pairs.
+                    I found that the optimal standard deviations for the gaussians were ~3.3 for lowpass and ~1.7 for highpass. Those being smaller may also be due to the fact that the images themselves are smaller.
+                    I also produced visuals for the merging process below.
+                </p>
+
+                <div class="full-width-image-container">
+                     <figure class="result-item">
+                        <img src="./assets/2.2/process_visual/fft_plots.png" alt="FFT Visualization">
+                        <figcaption>Fourier Transform Visualization</figcaption>
+                    </figure>
+                </div>
+
+                <div class="full-width-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2.2/process_visual/img_plots.png" alt="Image Filtering Process">
+                        <figcaption>Filtering Process Visualization</figcaption>
+                    </figure>
+                </div>
+                <p>The above plots include the {fft, image} of {the original person, the person lowpassed, the original robot, the robot highpassed, the final image}.
+                    We can observe key features in the FFT plots: for example, the lowpassed person image doesn't have much in the higher frequencies, especially for frequencies far from being parallel to the x or y axes.
+                    The robot highpass filtered FFT plot is missing the "bright central region" of frequencies that was present for the FFT plot of the original robot image.
+                </p>
 
                 <h3>2.3 & 2.4: Gaussian/Laplacian Stacks and Blending</h3>
                 <p>[Visualize the Gaussian and Laplacian stacks for the Orange/Apple images and recreate the blending results. Include your two additional custom blended images, ensuring one uses an irregular mask.]</p>
