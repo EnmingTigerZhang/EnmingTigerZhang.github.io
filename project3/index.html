@@ -421,7 +421,93 @@
 
             <section class="project-section">
                 <h2>A.4: Blending Images into a Mosaic</h2>
-                <p>[Show the source images and final results for three mosaics. Explain your blending procedure (e.g., weighted averaging, pyramid blending) and how it helps reduce artifacts.]</p>
+                <p>I then used the previously written homography calculation as well as warping code to blend together some images into mosaics.
+                    <br>
+                    My workflow started with calculating the homography matrices; for each triplet, I calculated the homography matrix to warp from the left image's plane to the middle image's plane, and another homography matrix to warp from the right image's plane to the middle image's plane.
+                    I accomplished this by choosing around 12 points of correspondencies between the left and the middle images, and then around 12 points of correspondencies between the middle and the right images, and calling the previously written homography calculation function.
+                    <br>
+                    Then, I actually warped the left and right images, also using the previously written warping code, as well as the homography matrices calculated just now.
+                    <br>
+                    Then, I determined the size of the mosaic that can fit all three images.
+                    My warping code gives me the "offset" of the warped image in the coordinates of the middle image (basically, in the coordinates of the middle image, what are the coordinates of the top left corner of the projected/warped image), where I'm projecting everything to.
+                    This allowed me to find the "minimum x and y coordinates" with any data, as well as the "maximum x and y coordinates" with any data, which gave me the size of the final mosaic.
+                    With the information about the "offset", I was able to put the left, middle, and right images individually onto blank mosaics (of the correct size) at the correct locations.
+                    <br>
+                    With this, I then blended the images together. I accomplished this by using a weighted average between image pixels where images overlap; I blended together the left and middle images first, and then blended this result with the right image.
+                    I followed the advice from lecture to use the "distance from each pixel to the closest pixel outside of the image" (referred to as edt from now on) to help. To calculate this per-pixel value for the left, middle, and right images, I used a separate mask that is 1.0 where the image is "defined" and 0.0 where the image is "undefined" instead of an alpha channel; I wrote a function to calculate this for all of the images.
+                    I used scipy.ndimage.distance_transform_edt on those masks to calculate the edt's.
+                    For the specifics of the weight distribution between the pixels from the two images when two images overlap, let d1 and d2 be the edt values of image1 and image2 at a specific pixel; image1's pixel's weight would be d1 / (d1 + d2 + eps) and image2's pixel's weight would be d2 / (d1 + d2 + eps), where eps is a small constant to avoid division by 0.
+                    <br><br>
+                    Overall, the main difficulty I encountered was choosing good points to make sure the homography is good between two images; I found that having a big positional "spread" of point correspondences is very important, in addition to the accuracy of the correspondences themselves.
+                    <br>
+                    See examples of mosaic blending below.
+                </p>
+
+                <h3>Set 1: Warren</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/1.jpg" alt="Warren Source 1">
+                        <figcaption>Warren 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/2.jpg" alt="Warren Source 2">
+                        <figcaption>Warren 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/3.jpg" alt="Warren Source 3">
+                        <figcaption>Warren 3</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/res.jpg" alt="Warren Mosaic">
+                        <figcaption>Final Mosaic</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 2: VLSB</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/1.jpg" alt="VLSB Source 1">
+                        <figcaption>VLSB 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/2.jpg" alt="VLSB Source 2">
+                        <figcaption>VLSB 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/3.jpg" alt="VLSB Source 3">
+                        <figcaption>VLSB 3</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/res.jpg" alt="VLSB Mosaic">
+                        <figcaption>Final Mosaic</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 3: Dwinelle</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/1.jpg" alt="Dwinelle Source 1">
+                        <figcaption>Dwinelle 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/2.jpg" alt="Dwinelle Source 2">
+                        <figcaption>Dwinelle 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/3.jpg" alt="Dwinelle Source 3">
+                        <figcaption>Dwinelle 3</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/res.jpg" alt="Dwinelle Mosaic">
+                        <figcaption>Final Mosaic</figcaption>
+                    </figure>
+                </div>
             </section>
         </main>
 
