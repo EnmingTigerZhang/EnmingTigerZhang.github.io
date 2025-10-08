@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 3 - CS180 Portfolio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            color: #333;
+            margin: 0;
+            background-image: url('../assets/images/background.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #6c757d;
+        }
+        .project-section {
+            margin-bottom: 40px;
+        }
+        .project-section h2 {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .three-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .result-item img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-item figcaption {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .results-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .matrix-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .matrix-table {
+            position: relative;
+            display: inline-block;
+            padding: 0 10px;
+        }
+        .matrix-table::before, .matrix-table::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #333;
+        }
+        .matrix-table::before {
+            left: 0;
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+        }
+        .matrix-table::after {
+            right: 0;
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+        }
+        .matrix-table table {
+            border-collapse: collapse;
+            margin: 0;
+        }
+        .matrix-table td {
+            border: none;
+            padding: 5px 10px;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .single-image-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 75%;
+        }
+        .single-image-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">Back to Portfolio</a>
+        <header>
+            <h1>Project 3: Image Mosaicing</h1>
+            <p>In this project, I wrote code to warp images onto other projection planes, and blending them together as if they were captured from the same "angle".</p>
+        </header>
+
+        <main>
+            <section class="project-section">
+                <h2>A.1: Shooting the Pictures</h2>
+                <p>For the images, I captured them using my own phone, at 1x zoom for all images.
+                    I took pictures sequentially by fixing the vertical axis through my camera lens with my left hand, and then using my right hand to spin my phone around that axis.
+                    This ensures that the position of my camera doesn't change, which is important to ensure that my images are still related by homographies, especially when some of the scenes have depth (is three dimensional).
+                </p>
+
+                <h3>Set 1</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/1.jpg" alt="Set 1, Image 1">
+                        <figcaption>Warren 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/2.jpg" alt="Set 1, Image 2">
+                        <figcaption>Warren 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/3.jpg" alt="Set 1, Image 3">
+                        <figcaption>Warren 3</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 2</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/1.jpg" alt="Set 2, Image 1">
+                        <figcaption>VLSB 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/2.jpg" alt="Set 2, Image 2">
+                        <figcaption>VLSB 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/3.jpg" alt="Set 2, Image 3">
+                        <figcaption>VLSB 3</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 3</h3>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/1.jpg" alt="Set 3, Image 1">
+                        <figcaption>Dwinelle 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/2.jpg" alt="Set 3, Image 2">
+                        <figcaption>Dwinelle 2</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/3.jpg" alt="Set 3, Image 3">
+                        <figcaption>Dwinelle 3</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>A.2: Recovering Homographies</h2>
+                <p>The images I took, because the position of the camera didn't change, are related by homographies.
+                    To project an image to the plane of another, I just need to calculate the homography based on some point correspondences between the images, and then apply the homography to the image.
+                    <br>
+                    Homographies have 8 degrees of freedom, so I needed at minimum 4 pairs of points (8 equations).
+                    However, to make the system more robust, I allowed for having more than 4 pairs of points (where I would solve the overdetermined system using least squares).
+                    See an example of this below.
+                </p>
+
+                <h3>Visualizing Correspondences</h3>
+                <p>Points in the images are labeled with red crosses; please zoom in to see them more clearly (they are usually at corners).</p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/A.2/1.png" alt="Correspondence Set 1">
+                        <figcaption>Image 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/A.2/2.png" alt="Correspondence Set 2">
+                        <figcaption>Image 2</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Point Correspondences</h3>
+                <p>The same correspondences, represented in numbers. The origin is the top left corner, with X growing downwards and Y growing rightwards, as per the usual convention for images.</p>
+                <div class="results-gallery">
+                    <div>
+                        <h4>Image 1 Points</h4>
+                        <table>
+                            <thead><tr><th>X</th><th>Y</th></tr></thead>
+                            <tbody>
+                                <tr><td>458.2</td><td>614.8</td></tr>
+                                <tr><td>976.8</td><td>618.7</td></tr>
+                                <tr><td>452.3</td><td>710.3</td></tr>
+                                <tr><td>434.8</td><td>952.0</td></tr>
+                                <tr><td>988.5</td><td>725.9</td></tr>
+                                <tr><td>1019.7</td><td>955.9</td></tr>
+                                <tr><td>452.3</td><td>1032.0</td></tr>
+                                <tr><td>411.4</td><td>1614.9</td></tr>
+                                <tr><td>776.0</td><td>1039.8</td></tr>
+                                <tr><td>795.5</td><td>1614.9</td></tr>
+                                <tr><td>1021.6</td><td>1299.1</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Image 2 Points</h4>
+                        <table>
+                            <thead><tr><th>X</th><th>Y</th></tr></thead>
+                            <tbody>
+                                <tr><td>425.1</td><td>20.1</td></tr>
+                                <tr><td>1047.0</td><td>24.0</td></tr>
+                                <tr><td>427.0</td><td>152.7</td></tr>
+                                <tr><td>430.9</td><td>447.1</td></tr>
+                                <tr><td>1050.9</td><td>170.3</td></tr>
+                                <tr><td>1048.9</td><td>447.1</td></tr>
+                                <tr><td>454.3</td><td>540.7</td></tr>
+                                <tr><td>460.1</td><td>1047.6</td></tr>
+                                <tr><td>787.7</td><td>542.6</td></tr>
+                                <tr><td>785.7</td><td>1041.7</td></tr>
+                                <tr><td>1004.1</td><td>788.3</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>System of Equations (Ah=b)</h3>
+                <p>For setting up least squares, I used the setup from discussion.
+                    (I also re-derived it, just by setting the resulting X and Y coordinates of the homography for each input point to be equal to the associated output point's coordinates).
+                    <br>
+                    Note that I set up the equations such that image1 will be projected onto the plane of image2.
+                </p>
+                <div class="matrix-container" style="overflow-x: auto; justify-content: center;">
+                    <div class="matrix-table">
+                        <table>
+                            <tbody>
+                                <tr><td>458.2</td><td>614.8</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.95e+05</td><td>-2.61e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>458.2</td><td>614.8</td><td>1</td><td>-9.23e+03</td><td>-1.24e+04</td></tr>
+                                <tr><td>976.8</td><td>618.7</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.02e+06</td><td>-6.48e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>976.8</td><td>618.7</td><td>1</td><td>-2.35e+04</td><td>-1.49e+04</td></tr>
+                                <tr><td>452.3</td><td>710.3</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.93e+05</td><td>-3.03e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>452.3</td><td>710.3</td><td>1</td><td>-6.91e+04</td><td>-1.08e+05</td></tr>
+                                <tr><td>434.8</td><td>952.0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.87e+05</td><td>-4.10e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>434.8</td><td>952.0</td><td>1</td><td>-1.94e+05</td><td>-4.26e+05</td></tr>
+                                <tr><td>988.5</td><td>725.9</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.04e+06</td><td>-7.63e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>988.5</td><td>725.9</td><td>1</td><td>-1.68e+05</td><td>-1.24e+05</td></tr>
+                                <tr><td>1019.7</td><td>955.9</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.07e+06</td><td>-1.00e+06</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>1019.7</td><td>955.9</td><td>1</td><td>-4.56e+05</td><td>-4.27e+05</td></tr>
+                                <tr><td>452.3</td><td>1032.0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-2.05e+05</td><td>-4.69e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>452.3</td><td>1032.0</td><td>1</td><td>-2.45e+05</td><td>-5.58e+05</td></tr>
+                                <tr><td>411.4</td><td>1614.9</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.89e+05</td><td>-7.43e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>411.4</td><td>1614.9</td><td>1</td><td>-4.31e+05</td><td>-1.69e+06</td></tr>
+                                <tr><td>776.0</td><td>1039.8</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-6.11e+05</td><td>-8.19e+05</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>776.0</td><td>1039.8</td><td>1</td><td>-4.21e+05</td><td>-5.64e+05</td></tr>
+                                <tr><td>795.5</td><td>1614.9</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-6.25e+05</td><td>-1.27e+06</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>795.5</td><td>1614.9</td><td>1</td><td>-8.29e+05</td><td>-1.68e+06</td></tr>
+                                <tr><td>1021.6</td><td>1299.1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>-1.03e+06</td><td>-1.30e+06</td></tr>
+                                <tr><td>0</td><td>0</td><td>0</td><td>1021.6</td><td>1299.1</td><td>1</td><td>-8.05e+05</td><td>-1.02e+06</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <span style="font-size: 2em; margin: 0 10px;">h =</span>
+                    <div class="matrix-table">
+                        <table>
+                            <tbody>
+                                <tr><td>425.1</td></tr>
+                                <tr><td>20.1</td></tr>
+                                <tr><td>1047.0</td></tr>
+                                <tr><td>24.0</td></tr>
+                                <tr><td>427.0</td></tr>
+                                <tr><td>152.7</td></tr>
+                                <tr><td>430.9</td></tr>
+                                <tr><td>447.1</td></tr>
+                                <tr><td>1050.9</td></tr>
+                                <tr><td>170.3</td></tr>
+                                <tr><td>1048.9</td></tr>
+                                <tr><td>447.1</td></tr>
+                                <tr><td>454.3</td></tr>
+                                <tr><td>540.7</td></tr>
+                                <tr><td>460.1</td></tr>
+                                <tr><td>1047.6</td></tr>
+                                <tr><td>787.7</td></tr>
+                                <tr><td>542.6</td></tr>
+                                <tr><td>785.7</td></tr>
+                                <tr><td>1041.7</td></tr>
+                                <tr><td>1004.1</td></tr>
+                                <tr><td>788.3</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>Solved Homography</h3>
+                <h4>Matrix H</h4>
+                <div class="matrix-container">
+                    <div class="matrix-table">
+                        <table>
+                            <tr><td>1.670</td><td>0.390</td><td>-424.44</td></tr>
+                            <tr><td>-0.006</td><td>2.010</td><td>-1207.16</td></tr>
+                            <tr><td>0.000</td><td>0.001</td><td>1.000</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>Warped Result</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/A.2/1_projected.jpg" alt="Warped Image">
+                        <figcaption>Image 1 Warped</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>A.3: Warping the Images & Rectification</h2>
+                <p>I then wrote code to perform (inverse) warping given homographies.
+                    In general, I took the convention that the top left pixel is (0, 0), and I used the inverse of the homography matrix to map pixels in the result to positions within the original image. I also calculated a bounding box to put the final warped image into by calculating the warped coordinates of the four corners of the rectangular picture.
+                    I had two methods for warping:
+                    <br>
+                    Firstly, I had a method using the nearest neighbors strategy. Here, for each resulting pixel, I found the (continuous-valued) pixel coordinates in the original image that it maps to using the inverse of the homography matrix.
+                    Then, I rounded those coordinates to the nearest integer coordinates, and, if within the range of the original image, took the value of that pixel.
+                    <br>
+                    I also implemented warping using bilinear interpolation. I started with a similar workflow to find the "original image coordinates" for each new image coordinate (by applying the inverse of the homography matrix), and then performed bilinear interpolation on the four pixels that form the square that emcompasses the current pixel, exactly as presented in class.
+                    This was essentially a weighted average of those four pixels, with weight determined by how close it is to my mapped pixel.
+                    <br><br>
+                    Below are examples where I chose points on objects that are actually rectangles in the images, and then warped the image so that that object would appear as a rectangle. I performed both nearest neighbor and bilinear interpolation warping.
+                    On small details, bilinear interpolation produced smoother results.
+                    For example, when I zoomed into the top right of the squares in the first pair, nearest neighbor warping had small "blips", while bilinear interpolation was more smooth.
+                    This effect is not significant, though, and both methods provided visually reasonable images.
+                    I suspect the contrast between the two might become more significant (with bilinear being more smooth) if the images I used were lower quality.
+                    <br>
+                    In terms of runtime, nearest neighbor warping was faster; for warpings that took around 30 seconds for nearest neighbor warping, bilinear interpolation took around 50 seconds.
+                </p>
+
+                <h3>Example 1</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/A.3/1.jpg" alt="Original Image 1">
+                        <figcaption>Original Image 1</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/A.3/1_nn.jpg" alt="Nearest Neighbor Result 1">
+                        <figcaption>Nearest Neighbor Interpolation</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/A.3/1_bilinear.jpg" alt="Bilinear Result 1">
+                        <figcaption>Bilinear Interpolation</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Example 2</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/A.3/2.jpg" alt="Original Image 2">
+                        <figcaption>Original Image 2</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/A.3/2_nn.jpg" alt="Nearest Neighbor Result 2">
+                        <figcaption>Nearest Neighbor Interpolation</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/A.3/2_bilinear.jpg" alt="Bilinear Result 2">
+                        <figcaption>Bilinear Interpolation</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>A.4: Blending Images into a Mosaic</h2>
+                <p>[Show the source images and final results for three mosaics. Explain your blending procedure (e.g., weighted averaging, pyramid blending) and how it helps reduce artifacts.]</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
+        </footer>
+    </div>
+</body>
+</html>
