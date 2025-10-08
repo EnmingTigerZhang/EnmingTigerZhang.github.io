@@ -375,8 +375,8 @@
                     <br><br>
                     Below are examples where I chose points on objects that are actually rectangles in the images, and then warped the image so that that object would appear as a rectangle. I performed both nearest neighbor and bilinear interpolation warping.
                     On small details, bilinear interpolation produced smoother results.
-                    For example, when I zoomed into the top right of the squares in the first pair, nearest neighbor warping had small "blips", while bilinear interpolation was more smooth.
-                    This effect is not significant, though, and both methods provided visually reasonable images.
+                    For example, towards the left hand side of the painting, nearest neighbor warping had small "blips", while bilinear interpolation was more smooth.
+                    This effect is not that significant, though, and both methods provided visually reasonable images.
                     I suspect the contrast between the two might become more significant (with bilinear being more smooth) if the images I used were lower quality.
                     <br>
                     In terms of runtime, nearest neighbor warping was faster; for warpings that took around 30 seconds for nearest neighbor warping, bilinear interpolation took around 50 seconds.
@@ -403,17 +403,17 @@
                 <h3>Example 2</h3>
                 <div class="single-image-container">
                     <figure class="result-item">
-                        <img src="./assets/A.3/2.jpg" alt="Original Image 2">
+                        <img src="./assets/A.3/3.jpg" alt="Original Image 2">
                         <figcaption>Original Image 2</figcaption>
                     </figure>
                 </div>
                 <div class="results-gallery">
                     <figure class="result-item">
-                        <img src="./assets/A.3/2_nn.jpg" alt="Nearest Neighbor Result 2">
+                        <img src="./assets/A.3/3_nn.jpg" alt="Nearest Neighbor Result 2">
                         <figcaption>Nearest Neighbor Interpolation</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/A.3/2_bilinear.jpg" alt="Bilinear Result 2">
+                        <img src="./assets/A.3/3_bilinear.jpg" alt="Bilinear Result 2">
                         <figcaption>Bilinear Interpolation</figcaption>
                     </figure>
                 </div>
