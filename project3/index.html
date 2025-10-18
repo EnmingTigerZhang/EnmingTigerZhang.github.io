@@ -120,6 +120,10 @@
             text-align: right;
             font-family: 'Courier New', Courier, monospace;
         }
+        .pixelated {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
         .single-image-container {
             text-align: center;
             margin: 20px auto;
@@ -148,8 +152,13 @@
         <a href="../index.html" class="back-link">Back to Portfolio</a>
         <header>
             <h1>Project 3: Image Mosaicing</h1>
-            <p>In this project, I wrote code to warp images onto other projection planes, and blending them together as if they were captured from the same "angle".</p>
         </header>
+        <p>In this project, I wrote code to warp images onto other projection planes, and blending them together as if they were captured from the same "angle".
+            <br>
+            I also wrote code to find point correspondences between images, which are inputs to the function to find the homography between images.
+            <br>
+            One unexpected significant difficulty was actually the inconsistent definitions of the coordinates with different functions (such as which axis is the x-axis, which axis is the y-axis, and where is the origin). I learned to carefully evaluate the convention used whenever I use anything built-in, such as plt.ginput or plt.scatter.
+        </p>
 
         <main>
             <section class="project-section">
@@ -179,15 +188,15 @@
                 <div class="three-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/sets/set2/1.jpg" alt="Set 2, Image 1">
-                        <figcaption>VLSB 1</figcaption>
+                        <figcaption>BNorth 1</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/sets/set2/2.jpg" alt="Set 2, Image 2">
-                        <figcaption>VLSB 2</figcaption>
+                        <figcaption>BNorth 2</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/sets/set2/3.jpg" alt="Set 2, Image 3">
-                        <figcaption>VLSB 3</figcaption>
+                        <figcaption>BNorth 3</figcaption>
                     </figure>
                 </div>
 
@@ -233,8 +242,8 @@
 
                 <h3>Point Correspondences</h3>
                 <p>The same correspondences, represented in numbers. The origin is the top left corner, with X growing downwards and Y growing rightwards, as per the usual convention for images.</p>
-                <div class="results-gallery">
-                    <div>
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
                         <h4>Image 1 Points</h4>
                         <table>
                             <thead><tr><th>X</th><th>Y</th></tr></thead>
@@ -253,7 +262,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div>
+                    <div style="flex: 1;">
                         <h4>Image 2 Points</h4>
                         <table>
                             <thead><tr><th>X</th><th>Y</th></tr></thead>
@@ -466,24 +475,24 @@
                     </figure>
                 </div>
 
-                <h3>Set 2: VLSB</h3>
+                <h3>Set 2: BNorth</h3>
                 <div class="three-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/sets/set2/1.jpg" alt="VLSB Source 1">
-                        <figcaption>VLSB 1</figcaption>
+                        <img src="./assets/sets/set2/1.jpg" alt="BNorth Source 1">
+                        <figcaption>BNorth 1</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/sets/set2/2.jpg" alt="VLSB Source 2">
-                        <figcaption>VLSB 2</figcaption>
+                        <img src="./assets/sets/set2/2.jpg" alt="BNorth Source 2">
+                        <figcaption>BNorth 2</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/sets/set2/3.jpg" alt="VLSB Source 3">
-                        <figcaption>VLSB 3</figcaption>
+                        <img src="./assets/sets/set2/3.jpg" alt="BNorth Source 3">
+                        <figcaption>BNorth 3</figcaption>
                     </figure>
                 </div>
                 <div class="single-image-container">
                     <figure class="result-item">
-                        <img src="./assets/sets/set2/res.jpg" alt="VLSB Mosaic">
+                        <img src="./assets/sets/set2/res.jpg" alt="BNorth Mosaic">
                         <figcaption>Final Mosaic</figcaption>
                     </figure>
                 </div>
@@ -509,6 +518,169 @@
                         <figcaption>Final Mosaic</figcaption>
                     </figure>
                 </div>
+            </section>
+
+            <section class="project-section">
+                <h2>B.1: Harris Corner Detection</h2>
+                <p>For Part B, I worked on automating the point correspondence selection process for the images.
+                    <br>
+                    I started with Harris Corner detection, which takes into account gradients in multiple directions to detect corners.
+                    I got the raw outputs of Harris Corner detection using the starter code given.
+                    <br>
+                    In order to make the runtime and space complexity of future stages of the pipeline (e.g. ANMS) more reasonable, I did a preliminary filtering on the Harris corners detected by passing in a min_distance value into the peak_local_max function in the starter code; I defined min_distance as the smaller of the image's dimensions divided by 100.
+                    This significantly decreased the amount of harris corners detected, which is important for ANMS, because that part fills a matrix (e.g. distance matrix using dist2 given in the starter code) that scales quadratically with the amount of points.
+                    <br>
+                    For ANMS, I used dist2 to calculate the distances between all pairs of detected harris corners.
+                    For each harris corner with "score" s1, I found the shortest distance from the corner to another corner with a "score" s2 for which s1 < c_robust * s2.
+                    I used the paper's suggestion to use c_robust=0.9. I then sorted the points by this calculated "shortest distance", and returned the first "k" (default is 200) points.
+                    This ensures that if two close corners are both "good" corners, that the one with slightly higher score won't disqualify the one with slightly lower score from being kept.
+                    <br>
+                    For the image on the right, I kept 200 points.
+                </p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/B.1/total_points_colored.png" alt="Harris Corners without ANMS">
+                        <figcaption>Raw Harris Corners</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/B.1/ANMS_points_colored.png" alt="Harris Corners with ANMS">
+                        <figcaption>Harris Corners with ANMS</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>B.2: Feature Descriptor Extraction</h2>
+                <p>After detecting the features, I then worked on "characterizing" the harris corners so I can find point correspondences.
+                    <br>
+                    Following the methods in the paper, for every harris corner, I subsampled an 8x8 square of pixels from the 40x40 surrounding square of pixels. I also normalized the features so that each feature has mean 0 and variance 1.
+                    <br>
+                    As the paper itself didn't mention blurring before subsampling, I did not initially blur before subsampling. Because the final results were good without blurring, I did not add blurring to my pipeline.
+                    <br>
+                    The following are some examples of feature descriptors. For each, the feature location is labeled in the original image using a red dot, and the feature itself is shown on the right.
+                    <br>
+                    The features make sense as a representation of the vacinity of the harris corner; for example, for the feature for the sign, there is a clear corner, with white on the bottom and gray on the right (for the shadow of the sign).
+                </p>
+
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner1/point_original_pos_colored.png" alt="Feature 1 Location">
+                        <figcaption>Right Sign Feature Location</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner1/feature.jpg" alt="Feature 1 Descriptor" class="pixelated">
+                        <figcaption>Right Sign Feature Descriptor</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner2/point_original_pos_colored.png" alt="Feature 2 Location">
+                        <figcaption>Vent Feature Location</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner2/feature.jpg" alt="Feature 2 Descriptor" class="pixelated">
+                        <figcaption>Vent Feature Descriptor</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner3/point_original_pos_colored.png" alt="Feature 3 Location">
+                        <figcaption>Left Door Feature Location</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/B.2/corner3/feature.jpg" alt="Feature 3 Descriptor" class="pixelated">
+                        <figcaption>Left Door Feature Descriptor</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>B.3: Feature Matching</h2>
+                <p>After attaining a feature descriptor for each harris corner, I then proceeded to matching the corners between two images, so I can get point correspondences between two images.
+                    <br>
+                    To robustly retain the correct matches (without having the point correspondences being corrupted by incorrect matches), I employed the approach suggested by the paper.
+                    In particular, for each feature in one of the images, I looked at the ratio between the Euclidian distances between the feature and its best match and the second best match in the other image.
+                    If this ratio is small, that means that the best match is a lot better than the second best match. I chose a cutoff of 0.5 for this ratio, looking at the plot given in the paper.
+                    <br>
+                    Examples of results are shown below. Different types of images have different amounts of points: for more complex images such as set 2, there are more point correspondences; for less complex images such as set 3, there are less point correspondences.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B.3/output1.png" alt="Matched Features 1">
+                        <figcaption>Matched Features Set 1 Left and Middle</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B.3/output2.png" alt="Matched Features 2">
+                        <figcaption>Matched Features Set 2 Right and Middle</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B.3/output3.png" alt="Matched Features 3">
+                        <figcaption>Matched Features Set 3 Left and Middle</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="project-section">
+                <h2>B.4: RANSAC for Robust Homography</h2>
+                <p>After attaining the points from feature matching from the previous stage, there were still points that were not correct matches.
+                    I proceeded to solve this issue by using the RANSAC algorithm.
+                    <br><br>
+                    I repeatedly draw 4 point correspondencies at random, calculate a homography from them, and evaluate which other point correspondencies are consistent with this homography (the "inlier" set) by evaluating the magnitude of the difference between the point in the first image transformed by this homography and the corresponding point in the second image.
+                    I set a cutoff (default is 5 pixels) for this magnitude.
+                    I repeated this process for a set amount of times (default is 200 times), keeping track of the largest set of inliers, and returned that set in the end.
+                    Below are examples comparing manual stitching with automatic stitching, with analysis given in the end. I used the same image sets as manual stitching, so for the raw image inputs, please see part A (A.1 or A.4).
+                </p>
+
+                <h3>Set 1: Warren</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/res.jpg" alt="Warren Manual Mosaic">
+                        <figcaption>Manual Stitching</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set1/res_auto.jpg" alt="Warren Automatic Mosaic">
+                        <figcaption>Automatic Stitching: ANMS points: 500, c_robust: 0.9, Lowe Threshold: 0.7<br>RANSAC iterations: 400, RANSAC cutoff: 7.0</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 2: BNorth</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/res.jpg" alt="BNorth Manual Mosaic">
+                        <figcaption>Manual Stitching</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set2/res_auto.jpg" alt="BNorth Automatic Mosaic">
+                        <figcaption>Automatic Stitching: ANMS points: 200, c_robust: 0.9, Lowe Threshold: 0.5<br>RANSAC iterations: 200, RANSAC cutoff: 5.0</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Set 3: Dwinelle</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/res.jpg" alt="Dwinelle Manual Mosaic">
+                        <figcaption>Manual Stitching</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/sets/set3/res_auto.jpg" alt="Dwinelle Automatic Mosaic">
+                        <figcaption>Automatic Stitching: ANMS points: 200, c_robust: 0.9, Lowe Threshold: 0.5<br>RANSAC iterations: 200, RANSAC cutoff: 5.0</figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Overall, the performance of automatic stitching was on par with the performance of manual stitching, though that is after my significant efforts to choose point correspondences with pixel-level accuracy.
+                    Automatic stitching, though, was significantly less energy consuming on my part.
+                    Further, for some sets of images (such as Set 3: Dwinelle), automatic stitching slightly outperformed manual stitching. For example, for the manually stitched mosaic, the right bar of the central frame was slightly blurry, whereas that for the automatically stitched mosaic was less blurry.
+                </p>
             </section>
         </main>
 
