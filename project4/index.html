@@ -185,7 +185,7 @@
                     Overall, it seems like the model learned "color" first, then details.
                     This is conceptually similar to getting the low frequencies first, then the high frequencies, though the results at earlier iterations also have high-frequency features (like horizontal and vertical edges), likely due to the presence of positional encodings.
                 </p>
-                <h3>Final Results</h3>
+                <h3>Final Result Grid</h3>
                 <div class="results-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1_64_3.jpg" alt="Width 64, Freq 3">
@@ -225,6 +225,17 @@
                 <p>Above is the PSNR curve for training the warren image, with model width being 256 and the maximum frequency paramete being 20.
                     The model learned quickly in the beginning, while making progress much slower after ~500 iterations (as its outputs were also close to the ground truth, as per earlier visualizations).
                 </p>
+                <h3>Final Rendered Results</h3>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1_5.jpg" alt="Fox Final Result">
+                        <figcaption>Fox Final Result</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/2_5.jpg" alt="Warren Final Result">
+                        <figcaption>Warren Final Result</figcaption>
+                    </figure>
+                </div>
             </section>
 
             <section class="project-section">
