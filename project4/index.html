@@ -69,6 +69,12 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .three-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -214,15 +220,153 @@
             <section class="project-section">
                 <h2>Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
                 <h3>Implementation Details</h3>
-                <p>[Your brief description of how you implemented each part goes here.]</p>
+                <p>I then moved on to training 3D NeRF models, for which I have the following functions/classes. For most purposes, I used the batched versions of the following functions, though I may describe parallel operations as "for each" for clarity.</p>
+                
+                <h4>• transform(c2w, x_c)</h4>
+                <p>
+                    Transforms the point(s) in x_c in camera coordinates to point(s) in world coordinates using the extrinsic matrix (or matrices) in c2w.
+                    <br><br>
+                    I multiplied each matrix ni c2w with each vector in x_c.
+                </p>
+
+                <h4>• pixel_to_camera(K, uv, s)</h4>
+                <p>
+                    Transforms the point(s) in uv in pixel coordinates to point(s) in camera coordinates using the intrinsic matrix K and scale s.
+                    <br><br>
+                    I augmented the vectors in uv so that they had homogeneous coordinates (concatenate a 1 to each vector), scaled them by s, and right-multiplied them into the inverse of K.
+                </p>
+
+                <h4>• pixel_to_ray(K, c2w, uv)</h4>
+                <p>
+                    Transforms the point(s) in uv in pixel coordinates to rays, represented by an origin r_o and a normalized direction r_b. Uses transform and pixel_to_camera.
+                    <br><br>
+                    I first found the camera coordinates of each input point using pixel_to_camera, called on K, uv, and 1 as the scale (so one specific point along the line of possible points in camera coordinates that map to the same pixel coordinate).
+                    Then, I converted those camera coordinate points to homogeneous coordinates, feeding them into transform along with c2w to get the world coordinates.
+                    For each c2w matrix, I extracted out the translation vector in it, calling it r_o for the point.
+                    For each point, I calculated the direction of r_b as world_coordinates - r_o, and normalized it to get r_b.
+                </p>
+
+                <h4>• sample_rays(images_train, c2ws_train, K, N_sample)</h4>
+                <p>
+                    Samples N_sample amount of rays randomly from the input (images_train), returning the rays and the ground-truth pixel values.
+                    <br><br>
+                    I had a function-based implementation for sampling rays. I sampled image_indices randomly from 0 to num_images - 1, row_indices randomly from 0 to image_H - 1, and col_indices randomly from 0 to image_W - 1.
+                    All the indices are length-N_sample, and num_images, image_H, and image_W can all be calculated from image_train's shape.
+                    For each sample, u = col_index + 0.5, v = row_index + 0.5.
+                    I then called pixel_to_ray for all of the samples to get the rays, and directly indexed into images_train to get the pixel values.
+                </p>
+
+                <h4>• sample_along_rays(r_o, r_b, near, far, num_samples, perturb=True)</h4>
+                <p>
+                    Samples num_samples amount of points anchored at r_o in r_b's direction, between distance r_o and r_b.
+                    <br><br>
+                    I first create a linspace between near and far of length num_samples, and repeat it for each ray in this batch, calling this "t".
+                    This is the amount along r_b that each sampled point will go.
+                    Then, if perturb is set to True, I added noise to the t array, perturbing each entry between 0 and (far - near) / num_samples.
+                    For each ray, I multiplied r_b by each entry in t, and added the results to r_o for the samples along that ray.
+                </p>
+
+                <h4>• flatten_and_positional_embedding(ray_samples, r_b, L_pos=10, L_dir=4)</h4>
+                <p>
+                    Takes in (Batch, num_samples, 3) ray_samples and (Batch, 3) r_b and returns (Batch * num_samples, 6 * L_pos + 3) position with positional encoding vector and (Batch * num_samples, 6 * L_dir + 3) direction with positional encoding vector.
+                    This is a helper function I decided to write.
+                    <br><br>
+                    I flattened ray_samples into (Batch*num_samples, 3), calculated sine and cosine inputs for each of x, y, and z dimensions according to the formula given in lecture, took the sine and cosine of those inputs, and stacked the results together (along with the original flattened input).
+                    <br>
+                    For the direction with positional encoding vector, I followed a similar process as described above, except I calculated the sinusoidal results first, before expanding to (Batch * num_samples, 6 * L_dir + 3).
+                </p>
+
+                <h4>• NeRF(nn.Module)</h4>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2/3d_nerf.png" alt="Model Architecture">
+                        <figcaption>3D NeRF Architecture, Credits: CS 180 Staff, Fall 2025</figcaption>
+                    </figure>
+                </div>
+                <p>I wrote a class (subclass of nn.Module) for my NeRF model. It has the structure described in the image, though supporting for arbitrary hidden layer widths (not just 256) and positional encoding maximum frequencies for both the position (L_pos) and direction (L_dir) inputs.
+                    <br><br>
+                    On a high level, it has an embedding-calculation section taking in the 3d position (with positional encoding), the output of which will be used to predict the color (which also takes into account the viewing direction), as well as the density.
+                </p>
+
+                <h4>• volrend(sigmas, rgbs, step_size)</h4>
+                <p>
+                    Renders colors, according to the discrete version of the formula on the project spec.
+                    <br><br>
+                    For each ray, at each position, I calculated exp(-sigma*step_size) (which is roughly the probability of light going through this point) for use later.
+                    For each position, its "color contribution" to the ray it belongs to is rgbs[position]*(1-exp(-sigma*step_size))*{product of exp(-sigma*step_size) for all previous points}.
+                    The color of a ray is the sum of the "color contribution" of all of the sampled points on it.
+                </p>
+
+                <h4>• render_one_image(model, c2w, H, W, K, near=2.0, far=6.0, num_samples=32)</h4>
+                <p>
+                    Renders an entire image given a c2w matrix. Useful for inference and validation.
+                    <br><br>
+                    Iterates over all pixel coordinates in the image, adding 0.5 to both pixel coordinates to get the u, v values, which are fed to pixel_to_ray in batches to get rays, then fed to sample_along_rays (with perturb=False) to sample points along rays, then fed to flatten_and_positional_embedding to get inputs to the model, then fed into the model to get rgbs and sigmas, then rendered into colors with volrend.
+                </p>
+
                 <h3>Ray and Sample Visualization</h3>
-                <p>[Your visualization of rays and samples with cameras goes here.]</p>
+                <p>Using the dataloading technique described above, I samples some rays (and ultimately points) in the lego dataset. Results are shown below.</p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2/viser_side_top.png" alt="Side Top View">
+                        <figcaption>Side-Top View</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/viser_side.png" alt="Side View">
+                        <figcaption>Side View</figcaption>
+                    </figure>
+                </div>
                 <h3>Training Progression</h3>
-                <p>[Your training progression visualization with predicted images across iterations goes here.]</p>
-                <h3>PSNR Curve</h3>
-                <p>[Your PSNR curve on the validation set goes here.]</p>
-                <h3>Spherical Rendering</h3>
-                <p>[Your spherical rendering video of the Lego scene goes here.]</p>
+                <p>I trained a 3D NeRF model with implementation described above. Here is how the results on validation image 0 progressed through iterations.
+                    <br>
+                    Here are the choices I made: I used MSE Loss, Adam optimizer, learning rate = 5e-4, num_samples = 64, near = 2.0, far = 6.0, batch_size = 10000, num_iters = 1205, L_pos = 10, L_dir = 4, network width = 256.
+                    <br>
+                    For results below, Iteration i means results after the ith iteration.
+                </p>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2/0.jpg" alt="Iteration 0">
+                        <figcaption>Iteration 0</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/100.jpg" alt="Iteration 100">
+                        <figcaption>Iteration 100</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/300.jpg" alt="Iteration 300">
+                        <figcaption>Iteration 300</figcaption>
+                    </figure>
+                </div>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2/500.jpg" alt="Iteration 500">
+                        <figcaption>Iteration 500</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/800.jpg" alt="Iteration 800">
+                        <figcaption>Iteration 800</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/1200.jpg" alt="Iteration 1200">
+                        <figcaption>Iteration 1200</figcaption>
+                    </figure>
+                </div>
+                <h3>Results: PSNR and Rendering</h3>
+                <p>
+                    As above, here are the choices I made: I used MSE Loss, Adam optimizer, learning rate = 5e-4, num_samples = 64, near = 2.0, far = 6.0, batch_size = 10000, num_iters = 1205, L_pos = 10, L_dir = 4, network width = 256.
+                    <br>
+                    The validation PSNR surpassed 23 at around 1000, which accords with the staff solution.
+                </p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2/val_psnrs.png" alt="PSNR Curve">
+                        <figcaption>PSNR Curve on Validation Set</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2/test.gif" alt="Spherical Rendering">
+                        <figcaption>Spherical Rendering of Lego Scene</figcaption>
+                    </figure>
+                </div>
             </section>
 
             <section class="project-section">
