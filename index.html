@@ -29,10 +29,9 @@
             color: #6c757d;
         }
         .projects {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px; /* Flex gap is well-supported now */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
         .project {
             background: #fff;
@@ -41,7 +40,6 @@
             padding: 20px;
             text-align: center;
             transition: transform 0.2s;
-            width: 300px; /* Set a fixed width for consistency */
             box-sizing: border-box;
         }
         .project:hover {
@@ -56,6 +54,13 @@
             font-size: 0.9em;
             color: #6c757d;
         }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -65,7 +70,7 @@
     </style>
 </head>
 <body>
-    <div class="container" style="margin: 40px auto 80px;">
+    <div class="container">
         <header>
             <h1>Tiger Zhang's CS180 Portfolio</h1>
             <p>A collection of my pretty images and videos.</p>
@@ -88,6 +93,10 @@
                 <div class="project">
                     <h3><a href="./project3/index.html">Project 3</a></h3>
                     <p>Image Mosaicing</p>
+                </div>
+                <div class="project">
+                    <h3><a href="./project4/index.html">Project 4</a></h3>
+                    <p>Neural Radiance Fields</p>
                 </div>
             </section>
         </main>

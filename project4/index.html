@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 4 - CS180 Portfolio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            color: #333;
+            margin: 0;
+            background-image: url('../assets/images/background.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto 80px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #6c757d;
+        }
+        .project-section {
+            margin-bottom: 40px;
+        }
+        .project-section h2 {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .results-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .result-item img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-item figcaption {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .single-image-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 75%;
+        }
+        .single-image-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">Back to Portfolio</a>
+        <header>
+            <h1>Project 4: Neural Radiance Fields</h1>
+            <p>[A brief description of the project will go here.]</p>
+        </header>
+
+        <main>
+            <section class="project-section">
+                <h2>Part 0: Camera Calibration and 3D Scanning</h2>
+                <p>To start the project, I calibrated my camera (e.g. found its intrinsic matrix and distortion vector), and got a set of images to be used for training.
+                    <br><br>
+                    To calibrate my camera, I took ~50 pictures of a sheet of 6 ArUco tags using my phone camera (portrait), maintaining the same zoom (1x) but varying the distance and angle of the phone camera.
+                    For defining world coordinates, I defined the bottom left of tag 4 as the origin, horizontal (e.g. towards tag 5) as the x-direction, vertical (e.g. towards tag 0) as the y-direction, and out of the page as the z-direction.
+                    The entire sheet is defined to be at z=0.
+                    I found that the widths of the tags are 0.06m, the horizontal distances are 0.03m, and the vertical distances are ~0.01572m. I calculated the position of the corners of the tags from those definitions.
+                    I detected ArUco tags using cv2.aruco.ArucoDetector, and fed the object-point and image-point correspondences to cv2.calibrateCamera.
+                    <br><br>
+                    Once I calibrated my camera, I took ~70 pictures of a persimmon next to one ArUco tag (specifically tag 0), maintaining the same zoom (1x) and distance while varying the position of the phone camera.
+                    I defined the bottom left corner of the ArUco tag to be the origin, and x-direction, y-direction, and z-direction similar to how I defined them for the calibration images.
+                    I then detected the ArUco tags in all of the images and solved for the extrinsic matrices of all of the images via cv2.solvePnP.
+                    <br><br>
+                    See visualizations of the images I took below.
+                </p>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/0/1.jpeg" alt="Viser Screenshot 1">
+                        <figcaption>Frustums Visualization 1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/0/2.jpeg" alt="Viser Screenshot 2">
+                        <figcaption>Frustums Visualization 2</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/0/3.jpeg" alt="Viser Screenshot 3">
+                        <figcaption>Frustums Visualization 3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/0/4.jpeg" alt="Viser Screenshot 4">
+                        <figcaption>Frustums Visualization 4</figcaption>
+                    </figure>
+                </div>
+                <p>After solving for the extrinsics of all of the images, I undistorted them via the script given in the project spec.
+                    The effects were minimal as my camera didn't have much distortion to start with.
+                </p>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 1: Fit a Neural Field to a 2D Image</h2>
+                <p>
+                    Before moving on to training 3D NeRFs, I first trained a 2D NeRF. Inputs are normalized pixel positions (with positional encoding), and expected outputs are simply rgb values.
+                    <br><br>
+                    I wrote a dataloader to support training with arbitrary batch sizes, and hyper-parameter tuned by training various models, and modeled two images using 2D NeRFs. More details below.
+                </p>
+                <h3>Model Architecture</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/2d_nerf.jpg" alt="Model Architecture">
+                        <figcaption>2D NeRF Architecture, Credits: CS 180 Staff, Fall 2025</figcaption>
+                    </figure>
+                </div>
+                <p>I used the model architecture given in the project spec, feeding the input (with positional encoding, L=20) through three units of {linear layer (each with 256 activations) then ReLU}, then through another linear layer mapping from 256 dimensions to 3 dimensions, and finally a sigmoid layer.
+                    I trained for 3000 iterations (though the model achieved good performance long before that), sampling N=10000 pixels each iteration (by randomly sampling N integers between 0 and H - 1 as the row index and another N integers between 0 and W - 1 as the column index), and used the staff-recommended learning rate of 1e-2.
+                    As mentioned earlier, for my final model, I set L=20 and W=256 (width of network). I used MSE loss and the Adam optimizer.
+                </p>
+                <h3>Training Progression</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1_gallery.png" alt="Training Progression 1">
+                        <figcaption>Training Progression on the Fox</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/2_gallery.png" alt="Training Progression 2">
+                        <figcaption>Training Progression on My Image (Warren Hall)</figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Note: for the iteration number above, "iteration: i" means the results after the ith iteration (0-indexed).
+                    <br><br>
+                    Overall, it seems like the model learned "color" first, then details.
+                    This is conceptually similar to getting the low frequencies first, then the high frequencies, though the results at earlier iterations also have high-frequency features (like horizontal and vertical edges), likely due to the presence of positional encodings.
+                </p>
+                <h3>Final Results</h3>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1_64_3.jpg" alt="Width 64, Freq 3">
+                        <figcaption>Width (W): 64, Max Freq (L): 3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1_64_20.jpg" alt="Width 64, Freq 20">
+                        <figcaption>Width (W): 64, Max Freq (L): 20</figcaption>
+                    </figure>
+                </div>
+                <div class="results-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1_256_3.jpg" alt="Width 256, Freq 3">
+                        <figcaption>Width (W): 256, Max Freq (L): 3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1_256_20.jpg" alt="Width 256, Freq 20">
+                        <figcaption>Width (W): 256, Max Freq (L): 20</figcaption>
+                    </figure>
+                </div>
+                <p>
+                    I tried two model widths: 64 and 256; I also tried two maximum frequencies: 3 and 20.
+                    <br><br>
+                    Overall, it seems like the maximum frequency significantly impacted the performance of the model.
+                    Holding the model width to be the same, the models with 20 as the maximum frequency were able to capture significantly more detail than their counterparts with 3 as the maximum frequency.
+                    <br><br>
+                    Model width also impacted model performance, though seemingly not to the same extent.
+                    Holding the maximum frequency to be the same, the models with 256 as the width were able to capture slightly more detail than their counterparts with 64 as the width. (For example, consider the nose section of the fox from the two models with 20 as the maximum frequency).
+                </p>
+                <h3>PSNR Curve</h3>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/2_plot.png" alt="PSNR Curve">
+                        <figcaption>PSNR Curve (Warren Image, W=256, L=20)</figcaption>
+                    </figure>
+                </div>
+                <p>Above is the PSNR curve for training the warren image, with model width being 256 and the maximum frequency paramete being 20.
+                    The model learned quickly in the beginning, while making progress much slower after ~500 iterations (as its outputs were also close to the ground truth, as per earlier visualizations).
+                </p>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
+                <h3>Implementation Details</h3>
+                <p>[Your brief description of how you implemented each part goes here.]</p>
+                <h3>Ray and Sample Visualization</h3>
+                <p>[Your visualization of rays and samples with cameras goes here.]</p>
+                <h3>Training Progression</h3>
+                <p>[Your training progression visualization with predicted images across iterations goes here.]</p>
+                <h3>PSNR Curve</h3>
+                <p>[Your PSNR curve on the validation set goes here.]</p>
+                <h3>Spherical Rendering</h3>
+                <p>[Your spherical rendering video of the Lego scene goes here.]</p>
+            </section>
+
+            <section class="project-section">
+                <h2>Part 2.6: Training with Your Own Data</h2>
+                <h3>Novel Views GIF</h3>
+                <p>[Your GIF of the camera circling your object showing novel views goes here.]</p>
+                <h3>Discussion</h3>
+                <p>[Your discussion of code or hyperparameter changes you made goes here.]</p>
+                <h3>Training Loss</h3>
+                <p>[Your plot of training loss over iterations goes here.]</p>
+                <h3>Intermediate Renders</h3>
+                <p>[Your intermediate renders of the scene during training go here.]</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
+        </footer>
+    </div>
+</body>
+</html>
