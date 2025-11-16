@@ -69,6 +69,16 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .small-single-image-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 50%;
+        }
+        .small-single-image-container img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
         .three-col-gallery {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -93,7 +103,7 @@
         <a href="../index.html" class="back-link">Back to Portfolio</a>
         <header>
             <h1>Project 4: Neural Radiance Fields</h1>
-            <p>[A brief description of the project will go here.]</p>
+            <p>In this project, I took pictures of a persimmon and generated novel views of it using NeRF.</p>
         </header>
 
         <main>
@@ -319,8 +329,20 @@
                 <h3>Training Progression</h3>
                 <p>I trained a 3D NeRF model with implementation described above. Here is how the results on validation image 0 progressed through iterations.
                     <br>
-                    Here are the choices I made: I used MSE Loss, Adam optimizer, learning rate = 5e-4, num_samples = 64, near = 2.0, far = 6.0, batch_size = 10000, num_iters = 1205, L_pos = 10, L_dir = 4, network width = 256.
-                    <br>
+                    Here are the choices I made:
+                    <ul>
+                        <li>Loss: MSE Loss</li>
+                        <li>Optimizer: Adam optimizer</li>
+                        <li>learning rate = 5e-4</li>
+                        <li>num_samples = 64</li>
+                        <li>near = 2.0</li>
+                        <li>far = 6.0</li>
+                        <li>batch_size = 10000</li>
+                        <li>num_iters = 1205</li>
+                        <li>L_pos = 10</li>
+                        <li>L_dir = 4</li>
+                        <li>network width = 256</li>
+                    </ul>
                     For results below, Iteration i means results after the ith iteration.
                 </p>
                 <div class="three-col-gallery">
@@ -371,14 +393,117 @@
 
             <section class="project-section">
                 <h2>Part 2.6: Training with Your Own Data</h2>
-                <h3>Novel Views GIF</h3>
-                <p>[Your GIF of the camera circling your object showing novel views goes here.]</p>
                 <h3>Discussion</h3>
-                <p>[Your discussion of code or hyperparameter changes you made goes here.]</p>
+                <p>
+                    Finally, I trained a 3D NeRF on the data I captured in part 0.
+                    I employed a train-validation split where 90% of my images were in the training set, and the other 10% were in my validation set.
+                    I downscaled my images to 214x286, as per recommended by the project spec; I also scaled down the first two rows of the intrinsic matrix by the same factor to account for this.
+                    Learning from previous projects, to avoid aliasing, I blurred my image first with a Gaussian Kernel of size (11, 11) before downscaling.
+                    <br><br>
+                    The training loop includes most of the functions detailed in implementation details: I would sample rays (inputs) and their corresponding pixels from the training set for training.
+                    The model architecture itself is described in the "NeRF(nn.Module)" section.
+                    <br><br>
+                    I performed some hyperparameter tuning, which started with guessing for a good pair of near and far values.
+                    I used near=0.05 and far=0.55 from my own estimates of how far the persimmon was from the camera; those numbers worked well, so I kept them.
+                    For the rest of the design choices and hyperparameters, I did not deviate far from the default and/or recommended values, and here is a summary:
+                    <br>
+                    <ul>
+                    <li>
+                    Loss: MSE Loss
+                    <li>
+                    Optimizer: Adam optimizer
+                    <li>
+                    learning rate = 5e-4
+                    <li>
+                    num_samples = 64
+                    <li>
+                    near = 0.05
+                    <li>
+                    far = 0.55
+                    <li>
+                    batch_size = 10000
+                    <li>
+                    num_iters = 9603
+                    <li>
+                    L_pos = 10
+                    <li>
+                    L_dir = 4
+                    <li>
+                    network width = 256
+                    </ul>
+                    <br>
+                    For the number of training iterations, I allowed the model to keep training as long as I don't interrupt it.
+                    In particular, I saved a checkpoint for the model once every 200 iterations, and additionally saved the rendered results of the first validation image every 500 iterations.
+                    Otherwise, I did not make significant code changes.
+                    <br><br>
+                    This resulted in a model of the persimmon that is quite consistent across different views and that has a good amount of detail (especially at the leafs).
+                    The ArUco tag itself was similarly reconstructed nicely.
+                </p>
+
                 <h3>Training Loss</h3>
-                <p>[Your plot of training loss over iterations goes here.]</p>
+                <p>
+                    The training loss dropped nicely in this training configuration.
+                    Interestingly, it briefly plateaus at around 200 iterations, then dropping steeply again, finally starting to plateau at around 1000 iterations.
+                    I included a second loss curve with the first 9 iterations omitted to decrease the range of the losses and thereby make the rest of the curve more clear.
+                    The validation PSNR grew nicely to around 24 within around 2000 iterations.
+                </p>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.6/training_losses.png" alt="Training Losses">
+                        <figcaption>Training Losses</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/training_losses_with_omission.png" alt="Training Losses with Omission">
+                        <figcaption>Training Losses (with omission)</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/val_psnrs.png" alt="Validation PSNRs">
+                        <figcaption>Validation PSNRs</figcaption>
+                    </figure>
+                </div>
+
                 <h3>Intermediate Renders</h3>
-                <p>[Your intermediate renders of the scene during training go here.]</p>
+                <p>
+                    I rendered results after certain iterations in training (Iteration i means result after the ith training iteration, 0-indexed).
+                    The results got consistently better over the training iterations.
+                    Interestingly, although the increase in PSNR and decrease in loss between the 2000th iteration and 9500th iteration were small, iteration 9500's results seem to reconstruct the lighting on the persimmon better.
+                </p>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.6/0.jpg" alt="Iteration 0">
+                        <figcaption>Iteration 0</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/200.jpg" alt="Iteration 200">
+                        <figcaption>Iteration 200</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/400.jpg" alt="Iteration 400">
+                        <figcaption>Iteration 400</figcaption>
+                    </figure>
+                </div>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/2.6/1000.jpg" alt="Iteration 1000">
+                        <figcaption>Iteration 1000</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/2000.jpg" alt="Iteration 2000">
+                        <figcaption>Iteration 2000</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/2.6/9500.jpg" alt="Iteration 9500">
+                        <figcaption>Iteration 9500</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Novel Views GIF</h3>
+                <div class="small-single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/2.6/angle2.gif" alt="Novel Views">
+                        <figcaption>Novel Views GIF</figcaption>
+                    </figure>
+                </div>
             </section>
         </main>
 
