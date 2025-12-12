@@ -84,6 +84,12 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .two-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
         .three-col-gallery {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -818,53 +824,120 @@
             </section>
             <section class="project-section">
                 <h2>Part 1.8: Visual Anagrams</h2>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>
+                    After image-to-image translations, I started doing something even more interesting with diffusion.
+                    I decided to make visual anagrams, which are images that look like one thing one orientation, and another thing another orientation.
+                    I did this with a process very similar to CFG, except instead of being guided in one direction, I became guided in "two directions" instead, applying the following formula (credits to CS180 staff for the picture of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.8/anagram.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    I implemented precisely this formula in code. For a given step at time t (which I fed into the unet models):
+                    <br>
+                    epsilon1 is the predicted noise for the upright image towards the first prompt; to calculate it, I ran unet on the upright image with the first prompt as well as with a null prompt, and calculated the predicted noise according to the formula in part 1.6 (CFG).
+                    <br>
+                    epsilon2 is the predicted noise for the upside down image towards the second prompt; to calculate it, I ran unet on the upside down image with the second prompt as well as with a null prompt, and calculated the predicted noise according to the formula in part 1.6 (CFG). Then, I flipped the predicted noise.
+                    <br>
+                    Then, I used the average noise prediction as well as average variance prediction (over the two runs of unet with non-null prompts, and with the result of the upside down image flipped) for the rest of the function, which was identical to CFG (please refer to it for my implementation).
+                    <br><br>
+                    I show some of my results below. Their prompts are:
+                    <br>
+                    "an oil painting of a mushroom cloud"
+                    <br>
+                    "an oil painting of a bearded face"
+                    <br>
+                    "a lithograph of a snowy mountain peak"
+                    <br>
+                    "a lithograph of a white wolf's face"
+                    <br>
+                    "an oil painting of an old man"
+                    <br>
+                    "an oil painting of people around a campfire"
+                </p>
+                <h4>Cloud-Man</h4>
+                <div class="results-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.8/cloud_man/cloud.png" alt="Image 1">
-                        <figcaption>cloud.png</figcaption>
+                        <figcaption>Mushroom Cloud</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.8/cloud_man/man.png" alt="Image 2">
-                        <figcaption>man.png</figcaption>
+                        <figcaption>Man</figcaption>
                     </figure>
                 </div>
+                <h4>Mountain-Wolf</h4>
                 <div class="results-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.8/mountain_wolf/mountain.png" alt="Image 3">
-                        <figcaption>mountain.png</figcaption>
+                        <figcaption>Icy Mountain</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.8/mountain_wolf/wolf.png" alt="Image 4">
-                        <figcaption>wolf.png</figcaption>
+                        <figcaption>Wolf Face</figcaption>
                     </figure>
                 </div>
+                <h4>Man-Campfire</h4>
                 <div class="results-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.8/oldman_campfire/oldman..png" alt="Image 5">
-                        <figcaption>oldman.png</figcaption>
+                        <img src="./assets/1/1.8/oldman_campfire/oldman.png" alt="Image 5">
+                        <figcaption>Old Man</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.8/oldman_campfire/campfire.png" alt="Image 6">
-                        <figcaption>campfire.png</figcaption>
+                        <figcaption>Campfire</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.9: Hybrid Images</h2>
-                <p>Explanation for this section goes here.</p>
+                <p>
+                    I did something else interesting with diffusion: I made "hybrid images" that look like one thing close up and another thing far away.
+                    Much like part 1.8, the implementation was actually very similar to CFG, except it had a change in how I calculated the estimated noise each time.
+                    In particular, I applied the following formula (credits to CS180 staff for the picture of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.9/hybrid.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    I implemented precisely this formula in code. For a given step at time t (which I fed into the unet models):
+                    <br>
+                    epsilon1 is the predicted noise for the low-frequency part of the image (what the image looks like from afar); to calculate it, I ran unet on the image with the first prompt as well as with a null prompt, and calculated the predicted noise according to the formula in part 1.6 (CFG). Then, I low-pass filtered it by convolving it with a gaussian with size 33 and sigma=2.
+                    <br>
+                    epsilon2 is the predicted noise for the high-frequency part of the image (what the image looks like close up); to calculate it, I ran unet on the image with the second prompt (while using the results of running on the null prompt from earlier), and calculated the predicted noise according to the formula in part 1.6 (CFG). Then, I high-pass filtered it by subtracting it's convolution with a gaussian with size 33 and sigma=2.
+                    <br>
+                    Then, I used the average noise prediction as well as average variance prediction (over the two runs of unet with non-null prompts) for the rest of the function, which was identical to CFG (please refer to it for my implementation).
+                    <br><br>
+                    I show some of my results below. Their prompts are:
+                    <br>
+                    "an oil painting of a mushroom cloud"
+                    <br>
+                    "a painting of an ice cream cone"
+                    <br>
+                    "a painting of a mountain"
+                    <br>
+                    "a fierce and scary tiger"
+                    <br>
+                    "a lithograph of a skull"
+                    <br>
+                    "a lithograph of waterfalls"
+                </p>
                 <div class="three-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.9/cloud-icecream.png" alt="Image 1">
-                        <figcaption>cloud-icecream.png</figcaption>
+                        <figcaption>Cloud + Ice Cream Cone</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.9/mountain-tiger.png" alt="Image 2">
-                        <figcaption>mountain-tiger.png</figcaption>
+                        <figcaption>Mountain + Tiger</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.9/skull-waterfall.png" alt="Image 3">
-                        <figcaption>skull-waterfall.png</figcaption>
+                        <figcaption>Skull + Waterfall</figcaption>
                     </figure>
                 </div>
             </section>
