@@ -446,7 +446,7 @@
             <section class="project-section">
                 <h2>Part 1.7: Image-to-image Translation</h2>
                 <p>
-                    With cfg denoising implemented, I gained the ability to edit an image by adding noise to it and then passing it through the previous algorithm.
+                    With CFG denoising implemented, I gained the ability to edit an image by adding noise to it and then passing it through the previous algorithm.
                     I did exactly this, making sure I'm adding the right amount of noise for each i_start (I used the forward I implemented as well as iterative_denoise_cfg).
                     <br><br>
                     Following are my results.
@@ -643,151 +643,176 @@
                     </figure>
                 </div>
                 <h3>Part 1.7.2: Inpainting</h3>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>
+                    I then used the diffusion workflow to perform the task of inpainting, where I masked out a part of an image and inpainted it back.
+                    To do this, I essentially used the CFG function written above, but with a mask of what part of the image I actually update, according to the following formula (credits to CS180 staff for the picture of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7.2/masked_update.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    Here, x_t is essentially calculated in the same way as CFG written in part 1.6, so please reference that for my implementation.
+                    Though, notably, the t in this formula is referenced as t' in part 1.6. This means that after calculating x_t' (in part 1.6's words), I would multiply it with a binary mask indicating where I want to fill in, and the rest will be a noisy version of the original image.
+                    Inside of the forward function, I passed in t' (which is also called prev_t). After all of this, x_t' (in the terms of part 1.6) would proceed to the next iteration.
+                </p>
+                <h4>Campanile</h4>
+                <div class="four-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.7.2/campanile/campanile.png" alt="Image 1">
-                        <figcaption>campanile.png</figcaption>
+                        <figcaption>Campanile</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.2/campanile/mask.png" alt="Image 2">
-                        <figcaption>mask.png</figcaption>
+                        <figcaption>Campanile Mask</figcaption>
                     </figure>
                      <figure class="result-item">
                         <img src="./assets/1/1.7.2/campanile/to_replace.png" alt="Image 3">
-                        <figcaption>to_replace.png</figcaption>
+                        <figcaption>Campanile To Replace</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.2/campanile/inpainted.png" alt="Image 4">
-                        <figcaption>inpainted.png</figcaption>
+                        <figcaption>Campanile Inpainted</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>Walking Woman</h4>
+                <div class="four-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/flower/flower.png" alt="Image 5">
-                        <figcaption>flower.png</figcaption>
+                        <img src="./assets/1/1.7.2/walker/walker.png" alt="Image 1">
+                        <figcaption>Walking Woman</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/flower/mask.png" alt="Image 6">
-                        <figcaption>mask.png</figcaption>
+                        <img src="./assets/1/1.7.2/walker/mask.png" alt="Image 2">
+                        <figcaption>Walking Woman Mask</figcaption>
                     </figure>
                      <figure class="result-item">
-                        <img src="./assets/1/1.7.2/flower/to_replace.png" alt="Image 7">
-                        <figcaption>to_replace.png</figcaption>
+                        <img src="./assets/1/1.7.2/walker/to_replace.png" alt="Image 3">
+                        <figcaption>Walking Woman To Replace</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/flower/inpainted.png" alt="Image 8">
-                        <figcaption>inpainted.png</figcaption>
+                        <img src="./assets/1/1.7.2/walker/inpainted.png" alt="Image 4">
+                        <figcaption>Walking Woman Inpainted</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>Flower</h4>
+                <div class="four-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/walker/walker.png" alt="Image 9">
-                        <figcaption>walker.png</figcaption>
+                        <img src="./assets/1/1.7.2/flower/flower.png" alt="Image 1">
+                        <figcaption>Flower</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/walker/mask.png" alt="Image 10">
-                        <figcaption>mask.png</figcaption>
+                        <img src="./assets/1/1.7.2/flower/mask.png" alt="Image 2">
+                        <figcaption>Flower Mask</figcaption>
                     </figure>
                      <figure class="result-item">
-                        <img src="./assets/1/1.7.2/walker/to_replace.png" alt="Image 11">
-                        <figcaption>to_replace.png</figcaption>
+                        <img src="./assets/1/1.7.2/flower/to_replace.png" alt="Image 3">
+                        <figcaption>Flower To Replace</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.2/walker/inpainted.png" alt="Image 12">
-                        <figcaption>inpainted.png</figcaption>
+                        <img src="./assets/1/1.7.2/flower/inpainted.png" alt="Image 4">
+                        <figcaption>Flower Inpainted</figcaption>
                     </figure>
                 </div>
                 <h3>Part 1.7.3: Text-Conditional Image-to-image Translation</h3>
-                <p>Explanation for this section goes here.</p>
-                 <div class="three-col-gallery">
-                    <figure class="result-item">
-                        <img src="./assets/1/1.7.3/campanile-rocket/campanile.png" alt="Image 1">
-                        <figcaption>campanile.png</figcaption>
-                    </figure>
+                <p>
+                    Having previously implemented CFG, I actually also unlocked the ability to edit from one image to another.
+                    I can do this by changing the conditioned prompt that I pass into the CFG function.
+                    <br><br>
+                    Below, I show three examples where the prompt is related to the image on the left, and the original image is shown on the right.
+                    The prompts are respectively, "a rocket ship", "a pencil", and "a fierce and scary tiger".
+                </p>
+                <h4>Rocket-Campanile</h4>
+                 <div class="seven-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/1.png" alt="Image 2">
-                        <figcaption>1.png</figcaption>
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/3.png" alt="Image 3">
-                        <figcaption>3.png</figcaption>
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/5.png" alt="Image 4">
-                        <figcaption>5.png</figcaption>
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/7.png" alt="Image 5">
-                        <figcaption>7.png</figcaption>
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/10.png" alt="Image 6">
-                        <figcaption>10.png</figcaption>
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.3/campanile-rocket/20.png" alt="Image 7">
-                        <figcaption>20.png</figcaption>
+                        <figcaption>i_start=20</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7.3/campanile-rocket/campanile.png" alt="Image 1">
+                        <figcaption>Campanile</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>Pencil-Flower</h4>
+                 <div class="seven-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/flower.png" alt="Image 8">
-                        <figcaption>flower.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/1.png" alt="Image 2">
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/1.png" alt="Image 9">
-                        <figcaption>1.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/3.png" alt="Image 3">
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/3.png" alt="Image 10">
-                        <figcaption>3.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/5.png" alt="Image 4">
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/5.png" alt="Image 11">
-                        <figcaption>5.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/7.png" alt="Image 5">
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/7.png" alt="Image 12">
-                        <figcaption>7.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/10.png" alt="Image 6">
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/10.png" alt="Image 13">
-                        <figcaption>10.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/20.png" alt="Image 7">
+                        <figcaption>i_start=20</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/flower-pencil/20.png" alt="Image 14">
-                        <figcaption>20.png</figcaption>
+                        <img src="./assets/1/1.7.3/flower-pencil/flower.png" alt="Image 1">
+                        <figcaption>Flower</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>Tiger-Lion</h4>
+                 <div class="seven-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/lion.png" alt="Image 15">
-                        <figcaption>lion.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/1.png" alt="Image 2">
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/1.png" alt="Image 16">
-                        <figcaption>1.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/3.png" alt="Image 3">
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/3.png" alt="Image 17">
-                        <figcaption>3.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/5.png" alt="Image 4">
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/5.png" alt="Image 18">
-                        <figcaption>5.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/7.png" alt="Image 5">
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/7.png" alt="Image 19">
-                        <figcaption>7.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/10.png" alt="Image 6">
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/10.png" alt="Image 20">
-                        <figcaption>10.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/20.png" alt="Image 7">
+                        <figcaption>i_start=20</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.3/lion-tiger/20.png" alt="Image 21">
-                        <figcaption>20.png</figcaption>
+                        <img src="./assets/1/1.7.3/lion-tiger/lion.png" alt="Image 1">
+                        <figcaption>Lion</figcaption>
                     </figure>
                 </div>
             </section>
