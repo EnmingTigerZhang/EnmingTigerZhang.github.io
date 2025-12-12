@@ -17,7 +17,7 @@
             box-sizing: border-box;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto 80px;
             padding: 20px;
             background: rgba(255, 255, 255, 0.9);
@@ -53,6 +53,11 @@
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+        .result-item-small img {
+            width: 100%;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
         .result-item figcaption {
             font-size: 0.9em;
             color: #6c757d;
@@ -85,6 +90,30 @@
             gap: 20px;
             align-items: start;
         }
+        .four-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        .five-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+        .six-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+        .seven-col-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: -10px;
+            align-items: start;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -108,7 +137,19 @@
         <main>
             <section class="project-section">
                 <h2>Part 0: Initial Explorations</h2>
-                <p>Explanation for this section goes here.</p>
+                <p>
+                    I started the project by using DeepFloyd to generate some images.
+                    Here are the results, with prompts labeled as the caption for the first row.
+                    On the second row, I varied the amount of inference steps.
+                    <br>
+                    <br>
+                    Overall, I think the model adhered to the prompts very well.
+                    For all three images, the results were exactly what I was looking for as I wrote the prompt.
+                    num_inference_steps seems to control the level of "detail" in the resulting image.
+                    As I increased this value, there were more details.
+                    There actually seems to be a "sweet spot" in terms of this value; in my opinion, num_inference_steps=50 was the best for the tiger.
+                    num_inference_steps=20 resulted in limited detail (especially for the background), while num_inference_steps=100 resulted in too much "nonsensical" details.
+                 </p>
                 <div class="three-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/0/tiger_50.png" alt="Image 1">
@@ -140,254 +181,465 @@
             </section>
             <section class="project-section">
                 <h2>Part 1.1: Implementing the Forward Process</h2>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>
+                    To implement diffusion myself, I started with implementing the forward pass of diffusion (the noise addition part).
+                    I followed the following formula (credits to CS180 staff for the picture of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/forward.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    My function got alpha bar t by indexing into the alphas_cumprod array, sampled the noice using torch.randn_like(im), and simply applied the formula.
+                    In a sense, I "interpolated" between my original image and the noise, though the "weights" for the interpolation were square rooted.
+                    <br>
+                    <br>
+                    Following are visualizations for the result after applying forward.
+                </p>
+                <div class="four-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/campanile.png" alt="Image 1">
+                        <figcaption>Campanile</figcaption>
+                    </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.1/250.png" alt="Image 1">
-                        <figcaption>250.png</figcaption>
+                        <figcaption>Noisy Campanile at t=250</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.1/500.png" alt="Image 2">
-                        <figcaption>500.png</figcaption>
+                        <figcaption>Noisy Campanile at t=500</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.1/750.png" alt="Image 3">
-                        <figcaption>750.png</figcaption>
+                        <figcaption>Noisy Campanile at t=750</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.2: Classical Denoising</h2>
-                <p>Explanation for this section goes here.</p>
+                <p>
+                    I first tried classical denoising (e.g. blurring with a Gaussian) to see how it would work.
+                    I did this by simply using TF.gaussian_blur on the noisy image and a specified kernel size.
+                    <br>
+                    <br>
+                    After serious effort, I used kernel sizes of 5, 7, and 9 for t=250, 500, and 750, respectively.
+                    Following are the results. They are not great, and I expect neural network denoising to be better.
+                </p>
                 <div class="three-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.2/250_5.png" alt="Image 1">
-                        <figcaption>250_5.png</figcaption>
+                        <figcaption>Noisy Campanile at t=250, kernel_size=5</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.2/500_7.png" alt="Image 2">
-                        <figcaption>500_7.png</figcaption>
+                        <figcaption>Noisy Campanile at t=500, kernel_size=7</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.2/750_9.png" alt="Image 3">
-                        <figcaption>750_9.png</figcaption>
+                        <figcaption>Noisy Campanile at t=750, kernel_size=9</figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Here are the noisy images shown again for comparison.
+                </p>
+                <div class="three-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/250.png" alt="Image 1">
+                        <figcaption>Noisy Campanile at t=250</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/500.png" alt="Image 2">
+                        <figcaption>Noisy Campanile at t=500</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/750.png" alt="Image 3">
+                        <figcaption>Noisy Campanile at t=750</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.3: One-Step Denoising</h2>
-                <p>Explanation for this section goes here.</p>
+                <p>
+                    To implement one-step denoising, I first derived an expression for the predicted original image based on the unet model's predicted noise.
+                    I manipulated the following formula (credits to CS180 staff for the picture of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.1/forward.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    I isolated x_0 in the expression above.
+                    For each image with noise added to it, I put the model through unet, and then treated (part of) the unet output as the noise epsilon, and the noisy image as x_t.
+                </p>
                 <div class="three-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.3/250_noisy.png" alt="Image 1">
-                        <figcaption>250_noisy.png</figcaption>
-                    </figure>
-                    <figure class="result-item">
-                        <img src="./assets/1/1.3/250_denoised.png" alt="Image 2">
-                        <figcaption>250_denoised.png</figcaption>
+                        <figcaption>Noisy Campanile at t=250</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.3/500_noisy.png" alt="Image 3">
-                        <figcaption>500_noisy.png</figcaption>
-                    </figure>
-                    <figure class="result-item">
-                        <img src="./assets/1/1.3/500_denoised.png" alt="Image 4">
-                        <figcaption>500_denoised.png</figcaption>
+                        <figcaption>Noisy Campanile at t=500</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.3/750_noisy.png" alt="Image 5">
-                        <figcaption>750_noisy.png</figcaption>
+                        <figcaption>Noisy Campanile at t=750</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.3/250_denoised.png" alt="Image 4">
+                        <figcaption>Denoised Campanile at t=250</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.3/500_denoised.png" alt="Image 2">
+                        <figcaption>Denoised Campanile at t=500</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.3/750_denoised.png" alt="Image 6">
-                        <figcaption>750_denoised.png</figcaption>
+                        <figcaption>Denoised Campanile at t=750</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.4: Iterative Denoising</h2>
-                <p>Explanation for this section goes here.</p>
-                <div class="results-gallery">
+                <p>
+                    I then implemented iterative denoising to improve the quality of the outputs of the diffusion workflow.
+                    To do so, I followed the following formula (credits to CS180 staff for the pictur of the formula).
+                </p>
+                <div class="single-image-container">
                     <figure class="result-item">
-                        <img src="./assets/1/1.4/gaussian.png" alt="Image 1">
-                        <figcaption>gaussian.png</figcaption>
-                    </figure>
-                    <figure class="result-item">
-                        <img src="./assets/1/1.4/one_step.png" alt="Image 2">
-                        <figcaption>one_step.png</figcaption>
-                    </figure>
-                    <figure class="result-item">
-                        <img src="./assets/1/1.4/iterative.png" alt="Image 3">
-                        <figcaption>iterative.png</figcaption>
+                        <img src="./assets/1/1.4/iterative_formula.png" alt="Forward Process">
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <p>
+                    I defined timesteps as a list from 990 going to 0, decrementing by 30 each time.
+                    For each iteration, I did the following:
+                    <br><br>
+                    I defined t as timesteps[i], and prev_t as timesteps[i + 1].
+                    I got alpha bar t from alphas_cumprod at t, and alpha bar t prime from alphas_cumprod at prev_t.
+                    I calculated alpha t as alpha bar t divided by alpha bar t prime.
+                    I calculated beta as 1 - alpha t.
+                    I calculated the predicted original image (x_0) the same way as explained in the previous section.
+                    With this, I had all the variables I needed to calculate x t prime (except for the variance part).
+                    I included variance by calling the add_variance function on the resulting image and the predicted variance from unet.
+                    <br>
+                    With this, I started the next iteration.
+                    <br><br>
+                    The seed I used happened to result in a fairly "plain" iterative denoising result. Other seeds resulted in more interesting results, like on the course website.
+                </p>
+                <div class="five-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.4/90.png" alt="Image 4">
-                        <figcaption>90.png</figcaption>
+                        <figcaption>Noisy Campanile at t=90</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.4/240.png" alt="Image 5">
-                        <figcaption>240.png</figcaption>
+                        <figcaption>Noisy Campanile at t=240</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.4/390.png" alt="Image 6">
-                        <figcaption>390.png</figcaption>
+                        <figcaption>Noisy Campanile at t=390</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.4/540.png" alt="Image 7">
-                        <figcaption>540.png</figcaption>
+                        <figcaption>Noisy Campanile at t=540</figcaption>
                     </figure>
                      <figure class="result-item">
                         <img src="./assets/1/1.4/690.png" alt="Image 8">
-                        <figcaption>690.png</figcaption>
+                        <figcaption>Noisy Campanile at t=690</figcaption>
+                    </figure>
+                </div>
+                <div class="four-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.4/gaussian.png" alt="Image 1">
+                        <figcaption>Gaussian Denoising Result</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.4/one_step.png" alt="Image 2">
+                        <figcaption>One Step Denoising Result</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.4/iterative.png" alt="Image 3">
+                        <figcaption>Iterative Denoising Result</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.4/campanile.png" alt="Image 3">
+                        <figcaption>Campanile</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.5: Diffusion Model Sampling</h2>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>With the iterative denoising function from the previous part written, I had the ability to generate new images.
+                    I did this by passing in noise as the noisy image and starting at 990 (i_start=0) for the time step.
+                    Following are the results.
+                </p>
+                <div class="five-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.5/1.png" alt="Image 1">
-                        <figcaption>1.png</figcaption>
+                        <figcaption>Generated Image 1</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.5/2.png" alt="Image 2">
-                        <figcaption>2.png</figcaption>
+                        <figcaption>Generated Image 2</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.5/3.png" alt="Image 3">
-                        <figcaption>3.png</figcaption>
+                        <figcaption>Generated Image 3</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.5/4.png" alt="Image 4">
-                        <figcaption>4.png</figcaption>
+                        <figcaption>Generated Image 4</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.5/5.png" alt="Image 5">
-                        <figcaption>5.png</figcaption>
+                        <figcaption>Generated Image 5</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>
+                    The results from the previous section weren't great.
+                    Many of the images were somewhat natural-seeming, but didn't make much sense.
+                    To combat this, I wrote a function that implements classifier-free guidance.
+                    <br><br>
+                    This was actually quite a similar function as iterative denoising, as described above.
+                    The main distinction was my noise estimate, for which I followed the following formula (credits to CS180 staff for the pictur of the formula).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.6/cfg.png" alt="Forward Process">
+                    </figure>
+                </div>
+                <p>
+                    In this case, I ran the unet twice, once with the conditioned prompt, and once with a "null" prompt.
+                    Their respective noise estimates are epsilon_c and epsilon_u in the formula above.
+                    Gamma is a parameter that I made default to 7.
+                    <br><br>
+                    After calculating this noise, calculation of the predicted original image was the same as described in part 1.3, and the rest of the values are calculated the same way as described in part 1.4.
+                    Notably, I used the predicted variance from the contitioned prompt.
+                </p>
+                <div class="five-col-gallery">
                     <figure class="result-item">
                         <img src="./assets/1/1.6/1.png" alt="Image 1">
-                        <figcaption>1.png</figcaption>
+                        <figcaption>Generated Image 1</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.6/2.png" alt="Image 2">
-                        <figcaption>2.png</figcaption>
+                        <figcaption>Generated Image 2</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.6/3.png" alt="Image 3">
-                        <figcaption>3.png</figcaption>
+                        <figcaption>Generated Image 3</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.6/4.png" alt="Image 4">
-                        <figcaption>4.png</figcaption>
+                        <figcaption>Generated Image 4</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.6/5.png" alt="Image 5">
-                        <figcaption>5.png</figcaption>
+                        <figcaption>Generated Image 5</figcaption>
                     </figure>
                 </div>
             </section>
             <section class="project-section">
                 <h2>Part 1.7: Image-to-image Translation</h2>
-                <h3>Part 1.7.1: Editing Hand-Drawn and Web Images</h3>
-                <p>Explanation for this section goes here.</p>
-                <div class="three-col-gallery">
+                <p>
+                    With cfg denoising implemented, I gained the ability to edit an image by adding noise to it and then passing it through the previous algorithm.
+                    I did exactly this, making sure I'm adding the right amount of noise for each i_start (I used the forward I implemented as well as iterative_denoise_cfg).
+                    <br><br>
+                    Following are my results.
+                </p>
+                <h4>Campanile</h4>
+                <div class="seven-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/car/car.png" alt="Image 1">
-                        <figcaption>car.png</figcaption>
+                        <img src="./assets/1/1.7/campanile/1.png" alt="Image 1">
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/3.png" alt="Image 1">
+                        <figcaption>i_start=3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/5.png" alt="Image 1">
+                        <figcaption>i_start=5</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/7.png" alt="Image 1">
+                        <figcaption>i_start=7</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/10.png" alt="Image 1">
+                        <figcaption>i_start=10</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/20.png" alt="Image 1">
+                        <figcaption>i_start=20</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/campanile/campanile.png" alt="Image 1">
+                        <figcaption>Campanile</figcaption>
+                    </figure>
+                </div>
+                <h4>Lion</h4>
+                <div class="seven-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/1.png" alt="Image 1">
+                        <figcaption>i_start=1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/3.png" alt="Image 1">
+                        <figcaption>i_start=3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/5.png" alt="Image 1">
+                        <figcaption>i_start=5</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/7.png" alt="Image 1">
+                        <figcaption>i_start=7</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/10.png" alt="Image 1">
+                        <figcaption>i_start=10</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/20.png" alt="Image 1">
+                        <figcaption>i_start=20</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/lion/lion.png" alt="Image 1">
+                        <figcaption>Lion</figcaption>
+                    </figure>
+                </div>
+                <h4>Water Bottle</h4>
+                <div class="seven-col-gallery">
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/1.png" alt="Image 1">
+                        <figcaption>i_start=1</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/3.png" alt="Image 1">
+                        <figcaption>i_start=3</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/5.png" alt="Image 1">
+                        <figcaption>i_start=5</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/7.png" alt="Image 1">
+                        <figcaption>i_start=7</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/10.png" alt="Image 1">
+                        <figcaption>i_start=10</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/20.png" alt="Image 1">
+                        <figcaption>i_start=20</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7/waterbottle/waterbottle.png" alt="Image 1">
+                        <figcaption>Water Bottle</figcaption>
+                    </figure>
+                </div>
+                <h3>Part 1.7.1: Editing Hand-Drawn and Web Images</h3>
+                <p>The procedure explained above works particularly well on hand-drawn images and nonrealistic images.
+                    Thus, I drew a car and a christmas tree (the first two rows below) and found a cartoonish picture of a house online.
+                    Results are shown below.
+                </p>
+                <h4>Car Drawing</h4>
+                <div class="seven-col-gallery">
+                    <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/1.png" alt="Image 2">
-                        <figcaption>1.png</figcaption>
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/3.png" alt="Image 3">
-                        <figcaption>3.png</figcaption>
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/5.png" alt="Image 4">
-                        <figcaption>5.png</figcaption>
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/7.png" alt="Image 5">
-                        <figcaption>7.png</figcaption>
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/10.png" alt="Image 6">
-                        <figcaption>10.png</figcaption>
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
                         <img src="./assets/1/1.7.1/car/20.png" alt="Image 7">
-                        <figcaption>20.png</figcaption>
+                        <figcaption>i_start=20</figcaption>
+                    </figure>
+                    <figure class="result-item">
+                        <img src="./assets/1/1.7.1/car/car.png" alt="Image 1">
+                        <figcaption>Car Drawing</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>Tree Drawing</h4>
+                <div class="seven-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/house.png" alt="Image 8">
-                        <figcaption>house.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/1.png" alt="Image 2">
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/1.png" alt="Image 9">
-                        <figcaption>1.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/3.png" alt="Image 3">
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/3.png" alt="Image 10">
-                        <figcaption>3.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/5.png" alt="Image 4">
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/5.png" alt="Image 11">
-                        <figcaption>5.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/7.png" alt="Image 5">
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/7.png" alt="Image 12">
-                        <figcaption>7.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/10.png" alt="Image 6">
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/10.png" alt="Image 13">
-                        <figcaption>10.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/20.png" alt="Image 7">
+                        <figcaption>i_start=20</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/house/20.png" alt="Image 14">
-                        <figcaption>20.png</figcaption>
+                        <img src="./assets/1/1.7.1/tree/tree.png" alt="Image 1">
+                        <figcaption>Tree Drawing</figcaption>
                     </figure>
                 </div>
-                <div class="three-col-gallery">
+                <h4>House Cartoon</h4>
+                <div class="seven-col-gallery">
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/tree.png" alt="Image 15">
-                        <figcaption>tree.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/1.png" alt="Image 2">
+                        <figcaption>i_start=1</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/1.png" alt="Image 16">
-                        <figcaption>1.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/3.png" alt="Image 3">
+                        <figcaption>i_start=3</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/3.png" alt="Image 17">
-                        <figcaption>3.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/5.png" alt="Image 4">
+                        <figcaption>i_start=5</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/5.png" alt="Image 18">
-                        <figcaption>5.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/7.png" alt="Image 5">
+                        <figcaption>i_start=7</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/7.png" alt="Image 19">
-                        <figcaption>7.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/10.png" alt="Image 6">
+                        <figcaption>i_start=10</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/10.png" alt="Image 20">
-                        <figcaption>10.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/20.png" alt="Image 7">
+                        <figcaption>i_start=20</figcaption>
                     </figure>
                     <figure class="result-item">
-                        <img src="./assets/1/1.7.1/tree/20.png" alt="Image 21">
-                        <figcaption>20.png</figcaption>
+                        <img src="./assets/1/1.7.1/house/house.png" alt="Image 1">
+                        <figcaption>House Cartoon</figcaption>
                     </figure>
                 </div>
                 <h3>Part 1.7.2: Inpainting</h3>
