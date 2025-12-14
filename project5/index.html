@@ -142,7 +142,7 @@
 
         <main>
             <section class="project-section">
-                <h2>Part 0: Initial Explorations</h2>
+                <h2>Part A.0: Initial Explorations</h2>
                 <p>
                     I started the project by using DeepFloyd to generate some images.
                     Here are the results, with prompts labeled as the caption for the first row.
@@ -186,7 +186,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.1: Implementing the Forward Process</h2>
+                <h2>Part A.1.1: Implementing the Forward Process</h2>
                 <p>
                     To implement diffusion myself, I started with implementing the forward pass of diffusion (the noise addition part).
                     I followed the following formula (credits to CS180 staff for the picture of the formula).
@@ -223,7 +223,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.2: Classical Denoising</h2>
+                <h2>Part A.1.2: Classical Denoising</h2>
                 <p>
                     I first tried classical denoising (e.g. blurring with a Gaussian) to see how it would work.
                     I did this by simply using TF.gaussian_blur on the noisy image and a specified kernel size.
@@ -265,7 +265,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.3: One-Step Denoising</h2>
+                <h2>Part A.1.3: One-Step Denoising</h2>
                 <p>
                     To implement one-step denoising, I first derived an expression for the predicted original image based on the unet model's predicted noise.
                     I manipulated the following formula (credits to CS180 staff for the picture of the formula).
@@ -307,7 +307,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.4: Iterative Denoising</h2>
+                <h2>Part A.1.4: Iterative Denoising</h2>
                 <p>
                     I then implemented iterative denoising to improve the quality of the outputs of the diffusion workflow.
                     To do so, I followed the following formula (credits to CS180 staff for the pictur of the formula).
@@ -375,7 +375,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.5: Diffusion Model Sampling</h2>
+                <h2>Part A.1.5: Diffusion Model Sampling</h2>
                 <p>With the iterative denoising function from the previous part written, I had the ability to generate new images.
                     I did this by passing in noise as the noisy image and starting at 990 (i_start=0) for the time step.
                     Following are the results.
@@ -404,7 +404,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
+                <h2>Part A.1.6: Classifier-Free Guidance (CFG)</h2>
                 <p>
                     The results from the previous section weren't great.
                     Many of the images were somewhat natural-seeming, but didn't make much sense.
@@ -450,7 +450,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.7: Image-to-image Translation</h2>
+                <h2>Part A.1.7: Image-to-image Translation</h2>
                 <p>
                     With CFG denoising implemented, I gained the ability to edit an image by adding noise to it and then passing it through the previous algorithm.
                     I did exactly this, making sure I'm adding the right amount of noise for each i_start (I used the forward I implemented as well as iterative_denoise_cfg).
@@ -550,7 +550,7 @@
                         <figcaption>Water Bottle</figcaption>
                     </figure>
                 </div>
-                <h3>Part 1.7.1: Editing Hand-Drawn and Web Images</h3>
+                <h3>Part A.1.7.1: Editing Hand-Drawn and Web Images</h3>
                 <p>The procedure explained above works particularly well on hand-drawn images and nonrealistic images.
                     Thus, I drew a car and a christmas tree (the first two rows below) and found a cartoonish picture of a house online.
                     Results are shown below.
@@ -648,7 +648,7 @@
                         <figcaption>House Cartoon</figcaption>
                     </figure>
                 </div>
-                <h3>Part 1.7.2: Inpainting</h3>
+                <h3>Part A.1.7.2: Inpainting</h3>
                 <p>
                     I then used the diffusion workflow to perform the task of inpainting, where I masked out a part of an image and inpainted it back.
                     To do this, I essentially used the CFG function written above, but with a mask of what part of the image I actually update, according to the following formula (credits to CS180 staff for the picture of the formula).
@@ -720,7 +720,7 @@
                         <figcaption>Flower Inpainted</figcaption>
                     </figure>
                 </div>
-                <h3>Part 1.7.3: Text-Conditional Image-to-image Translation</h3>
+                <h3>Part A.1.7.3: Text-Conditional Image-to-image Translation</h3>
                 <p>
                     Having previously implemented CFG, I actually also unlocked the ability to edit from one image to another.
                     I can do this by changing the conditioned prompt that I pass into the CFG function.
@@ -823,7 +823,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.8: Visual Anagrams</h2>
+                <h2>Part A.1.8: Visual Anagrams</h2>
                 <p>
                     After image-to-image translations, I started doing something even more interesting with diffusion.
                     I decided to make visual anagrams, which are images that look like one thing one orientation, and another thing another orientation.
@@ -892,7 +892,7 @@
                 </div>
             </section>
             <section class="project-section">
-                <h2>Part 1.9: Hybrid Images</h2>
+                <h2>Part A.1.9: Hybrid Images</h2>
                 <p>
                     I did something else interesting with diffusion: I made "hybrid images" that look like one thing close up and another thing far away.
                     Much like part 1.8, the implementation was actually very similar to CFG, except it had a change in how I calculated the estimated noise each time.
@@ -941,6 +941,217 @@
                     </figure>
                 </div>
             </section>
+            <section class="project-section">
+                <h2>Part B.1: Training a Single-Step Denoising UNet</h2>
+                <p>
+                    In part B, I implemented my own unet capable of generating handwritten digits using the diffusion process.
+                    This started with implementing a function to add noise to the images, and implementing a basic unet.
+                </p>
+                <h3>Part B.1.2: Using the UNet to Train a Denoiser</h3>
+                <p>I "noised" images by adding to them a Gaussian noise of mean 0 and variance 1, multiplied by a "severity" of the noising described by the variable sigma. The following row of images shows the noising process.</p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2/noise_visual.png" alt="Image 1">
+                        <figcaption>Visual of Noising Process</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.1.2.1: Training</h3>
+                <p>
+                    I then implemented a basic unet (without time conditioning for flow matching nor class conditioning for digit generation).
+                    I followed precisely the architecture given on the website.
+                    <br><br>
+                    I then trained the model to denoise a noisy image (sigma=0.5), with the given hyperparameter choices on the website (e.g. AdamW with lr=1e-4, D=128, batch_size=256, 5 epochs).
+                    My loss plot is as follows, and I show results on some validation images after the first and the fifth epoch below.
+                    <br><br>
+                    Overall, the results were great, even for evaluation right after the first epoch (although performance after the first epoch is still slightly worse than performance after the fifth epoch).
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.1/loss.png" alt="Image 1">
+                        <figcaption>Loss Plot</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.1/epoch1.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.1/epoch5.png" alt="Image 1">
+                        <figcaption>Results after epoch 5</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.1.2.2: Out-of-Distribution Testing</h3>
+                <p>
+                    Having trained a denoising unet, I then tested its robustness to input images with various noise levels (sigma).
+                    I visualize some results below, where rows 1, 3, 5, 7, 9, 11, 13 are rows containing the noisy images (with noise levels being 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 from the leftmost column to the rightmost column).
+                    Rows 2, 4, 6, 8, 10, 12, 14 contains denoised results, each for the image immediately above it.
+                    <br><br>
+                    Overall, the model performed well when the noise levels were lower than what it encountered during training. However, at sigma=0.8 and sigma=1.0, the model did not reliably denoise the images, with some random patterns from the noise staying.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.2/res.png" alt="Image 1">
+                        <figcaption>Rows 1, 3, 5, 7, 9, 11, 13 are rows containing the noisy images (with noise levels being 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 from the leftmost column to the rightmost column). Rows 2, 4, 6, 8, 10, 12, 14 contains denoised results, each for the image immediately above it.</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.1.2.3: Denoising Pure Noise</h3>
+                <p>
+                    With the unet model set up, I then tried to use the model to "denoise pure noise".
+                    I followed the same training procedure as part 1.2.1, except instead of feeding it noised images, I fed it pure noise.
+                    <br><br>
+                    The results were, perhaps unsurprisingly, not great.
+                    After all, given pure noise, the model has no real information as to which digit it is expected to give.
+                    The results (after both the 1st and the 5th epoch) were just a "blend" of all the digits (in particular, the features of 3, 8, 6, and 5 seem quite visible) for all outputs.
+                    The model seems to have learned an "average" of the digits to minimize the loss of its predictions.
+                    The results from the 5th epoch were slightly more "smooth" than the results from the 1st epoch.
+                    <br><br>
+                    Below, I visualize firstly the training loss plot, and then some samples after the 1st and 5th epochs. For the samples, the first row has the noise inputs, and the second row has the model outputs on the noise input immediately above it.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.3/loss.png" alt="Image 1">
+                        <figcaption>Loss Plot</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.3/epoch1.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/1.2.3/epoch5.png" alt="Image 1">
+                        <figcaption>Results after epoch 5</figcaption>
+                    </figure>
+                </div>
+            </section>
+            <section class="project-section">
+                <h2>Part B.2: Training a Flow Matching Model</h2>
+                <h3>Part B.2.2: Training the UNet</h3>
+                <p>
+                    I then started to make the unet able to be used in flow-matching workflows by conditioning it with the time step.
+                    To do this, I took my existing implementation for unet, and added an input of t, which passes through two mini MLPs before being elementwise multiplied with activations.
+                    <br><br>
+                    I then trained this model to denoise, following the training procedure detailed on the project website, as well as its recommended hyperparameter choices (e.g. AdamW with lr=1e-2 and learning rate decay, D=64, batch_size=64, 10 epochs).
+                    <br><br>
+                    Below, I show the training loss plot.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.2/loss.png" alt="Image 1">
+                        <figcaption>Loss Plot</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.2.3: Sampling from the UNet</h3>
+                <p>
+                    With a time-conditioned unet trained, I gained the ability to do flow-matching-like tasks. I followed the algorithm given on the project website (e.g. predicting the negative noise direction at each time step and stepping in that direction, repeating for num_ts iterations).
+                    <br><br>
+                    Below, I present sampled results (denoising from pure noise) after the 1st, 5th, and 10th epochs.
+                    After epoch 1, most of the outputs didn't make sense.
+                    After epoch 5, many digit-like images were generated, with other pictures resembling penstrokes, but not really digits.
+                    The results after epoch 10 were similar quality to the results after epoch 5.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.3/epoch1.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.3/epoch5.png" alt="Image 1">
+                        <figcaption>Results after epoch 5</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.3/epoch10.png" alt="Image 1">
+                        <figcaption>Results after epoch 10</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.2.5: Training the UNet</h3>
+                <p>
+                    To further improve the quality of my generated digits, I added conditioning on the digit to my unet.
+                    I followed the project website's suggest method of doing this; in particular, the class c is a one-hot vector of length 10 that (like time t) passes through two MLPs.
+                    I made the outputs of the MLPs for c element-wise multiplied with activations at certain stages, and the outputs of the MLPs for t added at those same stages.
+                    <br><br>
+                    I then trained this model, following the same training procedure as the previous part (e.g. AdamW with lr=1e-2 and learning rate decay, D=64, batch_size=64, 10 epochs).
+                    <br><br>
+                    I present the loss plot below.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.5/loss.png" alt="Image 1">
+                        <figcaption>Loss Plot</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.2.6: Sampling from the UNet</h3>
+                <p>
+                    I then sampled from my trained model to perform handwritten digits generation.
+                    I followed the classifier-free guidance algorithm that I also implemented in part A of this project.
+                    I essentially took the difference between the conditional noise estimation and the unconditional noise estimation as a "guidance direction", and added a multiple of that (default=5.0) to the unconditional noise estimation as the final noise estimate.
+                    <br><br>
+                    I show my results after the 1st, 5th, and 10th epochs below.
+                    <br><br>
+                    Results after the 1st epoch were actually already decent, though some details for the 4's and 5's were still off.
+                    Results after the 5th and 10th epochs were great.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6/epoch1.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6/epoch5.png" alt="Image 1">
+                        <figcaption>Results after epoch 5</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6/epoch10.png" alt="Image 1">
+                        <figcaption>Results after epoch 10</figcaption>
+                    </figure>
+                </div>
+                <h3>Part B.2.6: UNet trained without learning rate decay</h3>
+                <p>
+                    I then explored training the UNet without learning rate decay.
+                    In accordance with the spirit of "making things simple", I first tried the simple method of just setting my learning rate to some intermediate value in the beginning (specifically I used 1e-3).
+                    This actually worked very well. I show my loss plot, as well as samples of each digit after the 1st, 5th, and 10th epochs below.
+                    <br><br>
+                    In the end, this method resulted in similar performance as using a learning rate scheduler.
+                </p>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6_no_schedule/loss.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6_no_schedule/epoch1.png" alt="Image 1">
+                        <figcaption>Results after epoch 1</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6_no_schedule/epoch5.png" alt="Image 1">
+                        <figcaption>Results after epoch 5</figcaption>
+                    </figure>
+                </div>
+                <div class="single-image-container">
+                    <figure class="result-item">
+                        <img src="./assets/B/2.6_no_schedule/epoch10.png" alt="Image 1">
+                        <figcaption>Results after epoch 10</figcaption>
+                    </figure>
+                </div>
+            </section>
+
         </main>
         <footer>
             <p>&copy; 2025 Tiger Zhang. <a href="mailto:enming_zhang@berkeley.edu">Contact Me</a></p>
